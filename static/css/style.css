@@ -27,6 +27,7 @@ body{
     height: 15em;
     width: 30em;
     padding: 2rem;
+    color: var(--eggshell);
     background-color: var(--space-indigo) !important;
 }
 

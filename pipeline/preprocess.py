@@ -1,7 +1,6 @@
 import os
 import joblib
 import pandas as pd
-import numpy as np
 
 def load_artifacts():
     base_path = os.path.dirname(__file__)
