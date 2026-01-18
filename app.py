@@ -7,6 +7,7 @@ from pipeline.custom_loss import asymmetric_huber
 from pipeline.inference import make_input_seq
 from pipeline.aggregation import aggregate_predictions
 from utils.smart_tip import generate_smart_tip
+from utils.reports import generate_csv, generate_pdf
 
 load_dotenv()
 
@@ -181,6 +182,45 @@ def hist_dash():
         print(dashboard)
         return render_template('hist.html', dashboard=dashboard)
     return render_template('hist.html', dashboard=None)
+
+@app.route('/history-reports', methods=['GET', 'POST'])
+def hist_rep():
+    if request.method == 'POST':
+        device_types = request.form.getlist('device_type[]')
+        history_range = request.form['history_range']
+        report_type = request.form['report_type']
+
+        home_id = session["home_id"]
+
+        if not device_types:
+            return "No device selected", 400
+        
+        n_steps = RANGE_TO_STEPS[history_range]
+
+        df_hist = (
+            df[df["home_id"] == home_id]
+            .tail(n_steps * 5)
+            .copy()
+        )
+
+        df_hist["timestamp"] = pd.to_datetime(df_hist["timestamp"])
+        df_hist = df_hist[df_hist["device_type"].isin(device_types)]
+
+        report_df = (
+            df_hist
+            .groupby(["device_type", pd.Grouper(key="timestamp", freq="1h")])
+            ["energy_kWh"]
+            .sum()
+            .reset_index()
+        )
+
+        if report_type == "csv":
+            return generate_csv(report_df, device_types, history_range)
+
+        elif report_type == "pdf":
+            return generate_pdf(report_df, device_types, history_range)
+        
+        return "Invalid report type", 400
 
 if __name__ == '__main__':
     app.run(debug=True)
