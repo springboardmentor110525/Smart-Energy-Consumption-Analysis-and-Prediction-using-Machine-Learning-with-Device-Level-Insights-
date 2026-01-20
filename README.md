@@ -9,10 +9,10 @@ The project is organized into two primary components:
 ## 📁 Project Structure
 Smart_Energy_Project/  
 │  
-├── notebooks/  # Jupyter notebooks for data analysis & modeling  
-│ 
-├── web/ # Flask-based web application  
-│ 
+├── notebooks/  # Jupyter notebooks for data analysis & modeling    
+│     
+├── web/ # Flask-based web application      
+│     
 └── README.md # (This file)  
 
 ---
@@ -55,3 +55,4 @@ This folder contains the complete web application built using **Flask**, **HTML*
 
 ## 👤 Author
 **Rutuja Parab**
+
