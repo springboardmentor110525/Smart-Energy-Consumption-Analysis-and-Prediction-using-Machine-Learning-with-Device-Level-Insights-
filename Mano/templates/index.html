@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSense | Advanced AI Forecast</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #ecf0f1; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Main Container */
+        .main-wrapper { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 900px; width: 100%; }
+        
+        /* Input Card */
+        .input-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        
+        /* Results Section */
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 400px; }
+        
+        /* Result Cards */
+        .stat-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; border-left: 5px solid #bdc3c7; }
+        .stat-card.instant { border-color: #f1c40f; } /* Yellow */
+        .stat-card.day { border-color: #3498db; }     /* Blue */
+        .stat-card.week { border-color: #9b59b6; }    /* Purple */
+        .stat-card.month { border-color: #2ecc71; }   /* Green */
+
+        h2 { text-align: center; color: #2c3e50; margin-top: 0; }
+        h4 { margin: 0 0 5px 0; color: #7f8c8d; font-size: 0.9em; text-transform: uppercase; }
+        .value { font-size: 1.5em; font-weight: bold; color: #2c3e50; }
+        .unit { font-size: 0.8em; color: #95a5a6; }
+
+        /* Form Styling */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; color: #34495e; font-weight: 600; font-size: 0.9rem; }
+        select, input { width: 100%; padding: 0.8rem; border: 1px solid #dfe6e9; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 1rem; background: #2c3e50; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #34495e; }
+
+        .loader { display: none; text-align: center; margin-top: 10px; color: #3498db; font-weight: bold; }
+        .error-msg { color: #c0392b; text-align: center; margin-top: 10px; display: none; }
+
+    </style>
+</head>
+<body>
+
+    <h1 style="color: #2c3e50; margin-bottom: 30px;">🏠 EcoSense AI Dashboard</h1>
+
+    <div class="main-wrapper">
+        
+        <div class="input-card">
+            <h2>Device Configuration</h2>
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label>Room</label>
+                    <select id="room">
+                        <option value="Living Room">Living Room</option>
+                        <option value="Kitchen">Kitchen</option>
+                        <option value="Bedroom">Bedroom</option>
+                        <option value="Bathroom">Bathroom</option>
+                        <option value="Study">Study</option>
+                        <option value="Laundry Room">Laundry Room</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Device</label>
+                    <select id="device">
+                        <option value="TV">TV</option>
+                        <option value="Fan">Fan</option>
+                        <option value="AC">AC</option>
+                        <option value="Refrigerator">Refrigerator</option>
+                        <option value="Lamp">Lamp</option>
+                        <option value="Microwave">Microwave</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="1">On (Active)</option>
+                        <option value="0">Off (Standby)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Power (Watts)</label>
+                    <input type="number" id="power_w" placeholder="e.g. 1500" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Hour (0-23)</label>
+                    <input type="number" id="hour" min="0" max="23" placeholder="e.g. 14" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Day / Type</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="day_of_week">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                        <select id="day_type">
+                            <option value="Weekday">Weekday</option>
+                            <option value="Weekend">Weekend</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" onclick="predictUsage()">Analyze Consumption</button>
+                <div id="loader" class="loader">Processing AI Simulation...</div>
+                <div id="error" class="error-msg"></div>
+            </form>
+        </div>
+
+        <div class="results-grid">
+            <div class="stat-card instant">
+                <h4>Current Hour</h4>
+                <div class="value" id="val-instant">--</div>
+                <div class="unit">kWh</div>
+            </div>
+
+            <div class="stat-card day">
+                <h4>Next 24 Hours</h4>
+                <div class="value" id="val-day">--</div>
+                <div class="unit">kWh Total</div>
+            </div>
+
+            <div class="stat-card week">
+                <h4>Next Week</h4>
+                <div class="value" id="val-week">--</div>
+                <div class="unit">kWh Est.</div>
+            </div>
+
+            <div class="stat-card month">
+                <h4>Next Month</h4>
+                <div class="value" id="val-month">--</div>
+                <div class="unit">kWh Est.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function predictUsage() {
+            // UI Handling
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            
+            const formData = {
+                room: document.getElementById('room').value,
+                device: document.getElementById('device').value,
+                status: document.getElementById('status').value,
+                power_w: document.getElementById('power_w').value,
+                hour: document.getElementById('hour').value,
+                day_of_week: document.getElementById('day_of_week').value,
+                day_type: document.getElementById('day_type').value
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loader').style.display = 'none';
+
+                if (data.error) {
+                    const errDiv = document.getElementById('error');
+                    errDiv.textContent = data.error;
+                    errDiv.style.display = 'block';
+                } else {
+                    // Update the Dashboard Cards
+                    document.getElementById('val-instant').textContent = data.instant_kwh;
+                    document.getElementById('val-day').textContent = data.day_kwh;
+                    document.getElementById('val-week').textContent = data.week_kwh;
+                    document.getElementById('val-month').textContent = data.month_kwh;
+                }
+            } catch (err) {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('error').textContent = "Failed to reach server";
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+    </script>
+
+</body>
+</html>
