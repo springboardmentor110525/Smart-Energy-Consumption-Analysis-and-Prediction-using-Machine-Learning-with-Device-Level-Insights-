@@ -39,7 +39,7 @@ class BaselineModel:
             test_size: Test set proportion
             random_state: Random seed
         """
-        print("\n📊 Preparing data for baseline model...")
+        print("\n[INFO] Preparing data for baseline model...")
         
         # Separate features and target
         X = df.drop(columns=[target_col])
@@ -56,24 +56,24 @@ class BaselineModel:
             X_numeric, y, test_size=test_size, random_state=random_state, shuffle=False
         )
         
-        print(f"   ✓ Training set: {len(self.X_train):,} samples")
-        print(f"   ✓ Test set: {len(self.X_test):,} samples")
-        print(f"   ✓ Features: {self.X_train.shape[1]}")
+        print(f"   [OK] Training set: {len(self.X_train):,} samples")
+        print(f"   [OK] Test set: {len(self.X_test):,} samples")
+        print(f"   [OK] Features: {self.X_train.shape[1]}")
         
         return self.X_train, self.X_test, self.y_train, self.y_test
     
     def train(self):
         """Train the baseline model"""
-        print("\n🎯 Training Linear Regression model...")
+        print("\n[INFO] Training Linear Regression model...")
         
         if self.X_train is None:
-            print("   ✗ Please prepare data first!")
+            print("   [ERROR] Please prepare data first!")
             return
         
         # Train model
         self.model.fit(self.X_train, self.y_train)
         
-        print("   ✓ Model trained successfully!")
+        print("   [OK] Model trained successfully!")
         
         # Get feature importance (coefficients)
         feature_importance = pd.DataFrame({
@@ -89,25 +89,25 @@ class BaselineModel:
     
     def predict(self):
         """Make predictions on test set"""
-        print("\n🔮 Making predictions...")
+        print("\n[INFO] Making predictions...")
         
         if self.model is None:
-            print("   ✗ Please train model first!")
+            print("   [ERROR] Please train model first!")
             return
         
         # Predict on test set
         self.predictions = self.model.predict(self.X_test)
         
-        print(f"   ✓ Generated {len(self.predictions):,} predictions")
+        print(f"   [OK] Generated {len(self.predictions):,} predictions")
         
         return self.predictions
     
     def evaluate(self):
         """Evaluate model performance"""
-        print("\n📈 Evaluating model performance...")
+        print("\n[INFO] Evaluating model performance...")
         
         if self.predictions is None:
-            print("   ✗ Please make predictions first!")
+            print("   [ERROR] Please make predictions first!")
             return
         
         # Calculate metrics
@@ -139,7 +139,7 @@ class BaselineModel:
     
     def visualize_predictions(self, save_path='reports/figures/baseline_predictions.png'):
         """Visualize actual vs predicted values"""
-        print("\n📊 Creating visualizations...")
+        print("\n[INFO] Creating visualizations...")
         
         fig, axes = plt.subplots(2, 2, figsize=(15, 10))
         
@@ -184,22 +184,22 @@ class BaselineModel:
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=100, bbox_inches='tight')
-        print(f"   ✓ Visualization saved to {save_path}")
+        print(f"   [OK] Visualization saved to {save_path}")
         plt.show()
     
     def save_model(self, path='models/baseline_lr.pkl'):
         """Save trained model"""
         if self.model is None:
-            print("   ✗ No model to save!")
+            print("   [ERROR] No model to save!")
             return
         
         joblib.dump(self.model, path)
-        print(f"   ✓ Model saved to {path}")
+        print(f"   [OK] Model saved to {path}")
     
     def load_model(self, path='models/baseline_lr.pkl'):
         """Load trained model"""
         self.model = joblib.load(path)
-        print(f"   ✓ Model loaded from {path}")
+        print(f"   [OK] Model loaded from {path}")
         return self.model
     
     def predict_future(self, X_future):
@@ -210,7 +210,7 @@ class BaselineModel:
             X_future: Future feature data
         """
         if self.model is None:
-            print("   ✗ Please train or load model first!")
+            print("   [ERROR] Please train or load model first!")
             return
         
         predictions = self.model.predict(X_future)
@@ -224,10 +224,10 @@ def main():
     print("="*60)
     
     # Load feature-engineered data
-    print("\n📂 Loading feature-engineered data...")
+    print("\n[INFO] Loading feature-engineered data...")
     df = pd.read_csv('data/processed/energy_data_features.csv', 
                      index_col='time', parse_dates=True)
-    print(f"   ✓ Loaded {len(df):,} records with {len(df.columns)} features")
+    print(f"   [OK] Loaded {len(df):,} records with {len(df.columns)} features")
     
     # Initialize baseline model
     baseline = BaselineModel()
@@ -256,10 +256,10 @@ def main():
     # Save metrics
     metrics_df = pd.DataFrame([metrics])
     metrics_df.to_csv('reports/results/baseline_metrics.csv', index=False)
-    print(f"\n   ✓ Metrics saved to reports/results/baseline_metrics.csv")
+    print(f"\n   [OK] Metrics saved to reports/results/baseline_metrics.csv")
     
     print("\n" + "="*60)
-    print("✓ BASELINE MODEL TRAINING COMPLETE!")
+    print("[OK] BASELINE MODEL TRAINING COMPLETE!")
     print("="*60)
     
     return baseline, metrics

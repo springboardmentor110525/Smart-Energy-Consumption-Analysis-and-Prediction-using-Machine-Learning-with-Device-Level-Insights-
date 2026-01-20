@@ -27,7 +27,7 @@ class FeatureEngineer:
         
     def extract_time_features(self):
         """Extract time-based features from datetime index"""
-        print("\n⏰ Extracting time-based features...")
+        print("\n[INFO] Extracting time-based features...")
         
         # Ensure index is datetime
         if not isinstance(self.df.index, pd.DatetimeIndex):
@@ -57,7 +57,7 @@ class FeatureEngineer:
         self.df['month_sin'] = np.sin(2 * np.pi * self.df['month'] / 12)
         self.df['month_cos'] = np.cos(2 * np.pi * self.df['month'] / 12)
         
-        print(f"   ✓ Added {14} time-based features")
+        print(f"   [OK] Added {14} time-based features")
         
         return self.df
     
@@ -69,7 +69,7 @@ class FeatureEngineer:
             columns: List of columns to create lags for
             lags: List of lag periods
         """
-        print(f"\n📊 Creating lag features for {len(columns)} columns...")
+        print(f"\n[INFO] Creating lag features for {len(columns)} columns...")
         
         for col in columns:
             if col in self.df.columns:
@@ -81,8 +81,8 @@ class FeatureEngineer:
         self.df.dropna(inplace=True)
         rows_after = len(self.df)
         
-        print(f"   ✓ Created lag features for lags: {lags}")
-        print(f"   ✓ Rows: {rows_before:,} → {rows_after:,} (dropped {rows_before - rows_after:,} NaN rows)")
+        print(f"   [OK] Created lag features for lags: {lags}")
+        print(f"   [OK] Rows: {rows_before:,} -> {rows_after:,} (dropped {rows_before - rows_after:,} NaN rows)")
         
         return self.df
     
@@ -94,7 +94,7 @@ class FeatureEngineer:
             columns: List of columns to create rolling features for
             windows: List of window sizes
         """
-        print(f"\n📈 Creating rolling window features...")
+        print(f"\n[INFO] Creating rolling window features...")
         
         for col in columns:
             if col in self.df.columns:
@@ -119,8 +119,8 @@ class FeatureEngineer:
         self.df.dropna(inplace=True)
         rows_after = len(self.df)
         
-        print(f"   ✓ Created rolling features for windows: {windows}")
-        print(f"   ✓ Rows: {rows_before:,} → {rows_after:,}")
+        print(f"   [OK] Created rolling features for windows: {windows}")
+        print(f"   [OK] Rows: {rows_before:,} -> {rows_after:,}")
         
         return self.df
     
@@ -131,7 +131,7 @@ class FeatureEngineer:
         Args:
             device_columns: List of device column names
         """
-        print(f"\n🏠 Creating device aggregation features...")
+        print(f"\n[INFO] Creating device aggregation features...")
         
         # Total energy consumption
         self.df['total_energy'] = self.df[device_columns].sum(axis=1)
@@ -154,7 +154,7 @@ class FeatureEngineer:
                 self.df[f'{col}_pct'] = (self.df[col] / self.df['total_energy']) * 100
                 self.df[f'{col}_pct'].fillna(0, inplace=True)
         
-        print(f"   ✓ Created {5 + len(device_columns)} aggregation features")
+        print(f"   [OK] Created {5 + len(device_columns)} aggregation features")
         
         return self.df
     
@@ -166,7 +166,7 @@ class FeatureEngineer:
             weather_cols: List of weather feature columns
             energy_col: Energy column to interact with
         """
-        print(f"\n🌤️ Creating weather-energy interaction features...")
+        print(f"\n[INFO] Creating weather-energy interaction features...")
         
         count = 0
         for weather_col in weather_cols:
@@ -176,7 +176,7 @@ class FeatureEngineer:
                     self.df[energy_col] * self.df[weather_col]
                 count += 1
         
-        print(f"   ✓ Created {count} interaction features")
+        print(f"   [OK] Created {count} interaction features")
         
         return self.df
     
@@ -188,7 +188,7 @@ class FeatureEngineer:
             columns_to_scale: List of columns to scale
             method: 'minmax' or 'standard'
         """
-        print(f"\n📏 Normalizing features using {method} scaling...")
+        print(f"\n[INFO] Normalizing features using {method} scaling...")
         
         # Select scaler
         if method == 'minmax':
@@ -209,7 +209,7 @@ class FeatureEngineer:
         # Concatenate with original
         self.df = pd.concat([self.df, df_scaled], axis=1)
         
-        print(f"   ✓ Scaled {len(columns_to_scale)} features")
+        print(f"   [OK] Scaled {len(columns_to_scale)} features")
         
         return self.df, self.scaler
     
@@ -217,7 +217,7 @@ class FeatureEngineer:
         """Save the fitted scaler"""
         if self.scaler is not None:
             joblib.dump(self.scaler, path)
-            print(f"   ✓ Scaler saved to {path}")
+            print(f"   [OK] Scaler saved to {path}")
     
     def get_feature_importance_data(self, target_col):
         """
@@ -243,7 +243,7 @@ class FeatureEngineer:
             target_col: Target variable
             sequence_length: Length of input sequences
         """
-        print(f"\n🔄 Creating sequences for LSTM (length={sequence_length})...")
+        print(f"\n[INFO] Creating sequences for LSTM (length={sequence_length})...")
         
         data = self.df[target_col].values
         
@@ -258,8 +258,8 @@ class FeatureEngineer:
         # Reshape for LSTM [samples, time steps, features]
         X = X.reshape((X.shape[0], X.shape[1], 1))
         
-        print(f"   ✓ Created {len(X):,} sequences")
-        print(f"   ✓ X shape: {X.shape}, y shape: {y.shape}")
+        print(f"   [OK] Created {len(X):,} sequences")
+        print(f"   [INFO] X shape: {X.shape}, y shape: {y.shape}")
         
         return X, y
 
@@ -271,10 +271,10 @@ def main():
     print("="*60)
     
     # Load cleaned data
-    print("\n📂 Loading cleaned data...")
+    print("\n[INFO] Loading cleaned data...")
     df = pd.read_csv('data/processed/energy_data_clean.csv', 
                      index_col='time', parse_dates=True)
-    print(f"   ✓ Loaded {len(df):,} records")
+    print(f"   [OK] Loaded {len(df):,} records")
     
     # Initialize feature engineer
     fe = FeatureEngineer(df)
@@ -299,12 +299,12 @@ def main():
     df_features = fe.create_rolling_features([target_col], windows=[3, 6, 12, 24])
     
     # Save engineered features
-    print(f"\n💾 Saving engineered features...")
+    print(f"\n[INFO] Saving engineered features...")
     df_features.to_csv('data/processed/energy_data_features.csv')
-    print(f"   ✓ Saved to data/processed/energy_data_features.csv")
+    print(f"   [OK] Saved to data/processed/energy_data_features.csv")
     
     print("\n" + "="*60)
-    print("✓ FEATURE ENGINEERING COMPLETE!")
+    print("[OK] FEATURE ENGINEERING COMPLETE!")
     print(f"  Total features: {len(df_features.columns)}")
     print("="*60)
     
