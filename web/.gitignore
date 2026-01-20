@@ -1,0 +1,73 @@
+# --------------------
+# Python
+# --------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# --------------------
+# Virtual Environments
+# --------------------
+.venv/
+venv/
+env/
+ENV/
+
+# --------------------
+# Environment Variables
+# --------------------
+.env
+.env.*
+
+# --------------------
+# ML / Model Artifacts
+# --------------------
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.keras
+
+# --------------------
+# Data Files
+# --------------------
+*.csv
+*.tsv
+*.parquet
+*.json
+database/
+data/
+
+# --------------------
+# Logs
+# --------------------
+*.log
+logs/
+
+# --------------------
+# Flask
+# --------------------
+instance/
+.flaskenv
+
+# --------------------
+# Jupyter / Experiments
+# --------------------
+.ipynb_checkpoints/
+notebooks/
+
+# --------------------
+# OS / Editor Junk
+# --------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --------------------
+# Build / Cache
+# --------------------
+build/
+dist/
+*.egg-info/

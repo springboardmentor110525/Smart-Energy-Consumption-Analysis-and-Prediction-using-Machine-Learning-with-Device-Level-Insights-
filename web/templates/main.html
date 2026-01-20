@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forecast</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.jpg') }}" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+  <a href="/history-dashboard" class="btn btn-secondary mt-1 mb-5" tabindex="-1" role="button">Go to User Dashboard</a>
+  <h3>Forecast For...</h3> 
+
+  <form action="/forecast" method="post" class="forecast-form">
+    <section class="forecast-input">
+      <!-- specific device -->
+      <div class="container">
+        <label for="device_type[]">Device Type:</label>
+        <div class="device-type d-flex flex-wrap gap-2">
+          <input type="checkbox" class="btn-check" id="fridge" name="device_type[]" value="fridge">
+          <label class="btn btn-outline-dark checks" for="fridge">Fridge</label>
+
+          <input type="checkbox" class="btn-check" id="ac" name="device_type[]" value="air_conditioner">
+          <label class="btn btn-outline-dark checks" for="ac">AC</label>
+
+          <input type="checkbox" class="btn-check" id="washer" name="device_type[]" value="washer">
+          <label class="btn btn-outline-dark checks" for="washer">Washer</label>
+
+          <input type="checkbox" class="btn-check" id="tv" name="device_type[]" value="tv">
+          <label class="btn btn-outline-dark checks" for="tv">TV</label>
+
+          <input type="checkbox" class="btn-check" id="light" name="device_type[]" value="light">
+          <label class="btn btn-outline-dark checks" for="light">Lights</label>
+        </div>
+      </div>
+
+      <!-- forecast range -->
+      <div class="container">
+        <label for="prediction_range">for next:</label>
+        <select name="prediction_range" class="form-select forecast-select" required>
+          <option value="" selected disabled>Time Range</option>
+          <option value="day_range">24 Hours</option>
+          <option value="week_range">7 Days</option>
+          <option value="month_range">30 Days</option>
+        </select>
+      </div>
+    </section>
+    <button type="submit" class="btn btn-outline-secondary mt-3">
+      Forecast
+    </button>
+  </form>
+
+  <hr>
+
+  {% if dashboard %}
+    <!-- chart containers -->
+     <div class="dashboard-top d-flex gap-3" style="width: 90%; flex-wrap: wrap;">
+      <div class="d-flex gap-3 flex-wrap flex-fill" style="width: 25%;">
+        <h6>Total Energy Consumed Per Device</h6>
+        <div id="kpiCards" class="device-type d-flex flex-wrap gap-2"></div>
+      </div>
+      <!-- smart tip -->
+    <div class="card text-bg-success Tip mt-4 mb-3">
+      <div class="card-header tipHeader">Smart Tip</div>
+      <div class="card-body">
+        <h5 class="card-title">{{ dashboard.smartTip.title }}</h5>
+        <p class="card-text">{{ dashboard.smartTip.message }}</p>
+      </div>
+    </div>
+      <div id="donutChart" style="flex: 1 1 300px; min-width: 350px; max-width: 600px; height: 350px;"></div>
+    </div>
+    <div class="chart-space">
+      <div id="lineChartDaily" style="height:400px; width: 100%;"></div>
+      {% if dashboard.metadata.range == "month_range" %}
+        <div id="weeklyChart" style="height:400px; width: 100%;"></div>
+      {% endif %}
+    </div>
+
+    <!-- embed dashboard JSON in a data attribute -->
+    <div id="dashboardContainer" data-dashboard='{{ dashboard | tojson | safe }}'></div>
+  {% else %}
+    <h3>No predictions yet</h3>
+  {% endif %}
+  <hr>
+
+  <!-- alert if no device picked -->
+  <script>
+    document.querySelector('.forecast-form').addEventListener('submit', function (e) {
+      const checked = document.querySelectorAll('input[name="device_type[]"]:checked');
+      if (checked.length === 0) {
+        e.preventDefault();
+        alert("Pick at least ONE device.");
+      }
+    });
+  </script>
+
+  <!-- load Plotly -->
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <!-- chart JS -->
+  <script src="{{ url_for('static', filename='js/forecast_charts.js') }}"></script>
+
+  <!-- bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
