@@ -4,9 +4,9 @@
 
 **Project Title**: Smart Energy Consumption Analysis and Prediction System  
 **Student**: Aditya Anand
+
 **Date**: January 21, 2026  
 **Status**: ✅ **COMPLETE & READY FOR SUBMISSION**  
-**Grade Goal**: **A+ (95-100%)**
 
 ---
 
