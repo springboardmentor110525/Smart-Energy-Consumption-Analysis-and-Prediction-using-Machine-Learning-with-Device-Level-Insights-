@@ -32,7 +32,7 @@ class SmartSuggestionsEngine:
         Args:
             device_columns: List of device column names
         """
-        print("\n🔍 Analyzing device usage patterns...")
+        print("\n[INFO] Analyzing device usage patterns...")
         
         for device in device_columns:
             if device in self.df.columns:
@@ -46,7 +46,7 @@ class SmartSuggestionsEngine:
                 }
                 self.device_stats[device] = stats
         
-        print(f"   ✓ Analyzed {len(self.device_stats)} devices")
+        print(f"   [OK] Analyzed {len(self.device_stats)} devices")
         
         return self.device_stats
     
@@ -57,7 +57,7 @@ class SmartSuggestionsEngine:
         Args:
             threshold_percentile: Percentile threshold for high consumption
         """
-        print(f"\n⚡ Identifying high energy consumers (>{threshold_percentile}th percentile)...")
+        print(f"\n[INFO] Identifying high energy consumers (>{threshold_percentile}th percentile)...")
         
         total_consumptions = {device: stats['total_consumption'] 
                             for device, stats in self.device_stats.items()}
@@ -68,13 +68,13 @@ class SmartSuggestionsEngine:
                          for device, consumption in total_consumptions.items()
                          if consumption > threshold}
         
-        print(f"   ✓ Found {len(high_consumers)} high-consuming devices")
+        print(f"   [OK] Found {len(high_consumers)} high-consuming devices")
         
         return high_consumers
     
     def detect_peak_usage_times(self):
         """Detect peak usage times for optimization"""
-        print("\n📊 Detecting peak usage times...")
+        print("\n[INFO] Detecting peak usage times...")
         
         # Hourly aggregation
         hourly_usage = self.df.groupby(self.df.index.hour).sum()
@@ -86,8 +86,8 @@ class SmartSuggestionsEngine:
         peak_hours = total_hourly.nlargest(5).index.tolist()
         off_peak_hours = total_hourly.nsmallest(5).index.tolist()
         
-        print(f"   ✓ Peak hours: {peak_hours}")
-        print(f"   ✓ Off-peak hours: {off_peak_hours}")
+        print(f"   [OK] Peak hours: {peak_hours}")
+        print(f"   [OK] Off-peak hours: {off_peak_hours}")
         
         return peak_hours, off_peak_hours
     
@@ -142,7 +142,7 @@ class SmartSuggestionsEngine:
         Args:
             energy_tips: Dictionary of energy-saving tips per device
         """
-        print("\n💡 Generating smart energy-saving suggestions...")
+        print("\n[INFO] Generating smart energy-saving suggestions...")
         
         all_suggestions = []
         
@@ -156,7 +156,7 @@ class SmartSuggestionsEngine:
         
         self.suggestions = all_suggestions
         
-        print(f"   ✓ Generated {len(all_suggestions)} suggestions")
+        print(f"   [OK] Generated {len(all_suggestions)} suggestions")
         
         return all_suggestions
     
@@ -172,10 +172,10 @@ class SmartSuggestionsEngine:
     
     def generate_report(self, save_path='reports/results/energy_suggestions.csv'):
         """Generate and save suggestions report"""
-        print(f"\n📄 Generating suggestions report...")
+        print(f"\n[INFO] Generating suggestions report...")
         
         if not self.suggestions:
-            print("   ✗ No suggestions to report!")
+            print("   [WARN] No suggestions to report!")
             return
         
         # Create DataFrame
@@ -184,7 +184,7 @@ class SmartSuggestionsEngine:
         # Save to CSV
         df_suggestions.to_csv(save_path, index=False)
         
-        print(f"   ✓ Report saved to {save_path}")
+        print(f"   [OK] Report saved to {save_path}")
         
         # Print summary
         print("\n" + "="*60)
@@ -208,16 +208,16 @@ class SmartSuggestionsEngine:
     def get_daily_tips(self):
         """Get daily energy-saving tips"""
         daily_tips = [
-            "💡 Turn off lights when leaving a room to save energy.",
-            "🌡️ Set your thermostat 2-3 degrees lower in winter and higher in summer.",
-            "🔌 Unplug devices when not in use to avoid phantom power drain.",
-            "🚿 Take shorter showers to reduce water heating costs.",
-            "🍽️ Run dishwasher and washing machine only with full loads.",
-            "❄️ Keep refrigerator temperature at 37-40°F for optimal efficiency.",
-            "💻 Enable power-saving mode on computers and monitors.",
-            "🌞 Use natural light during the day instead of artificial lighting.",
-            "🔋 Charge devices during off-peak hours for lower rates.",
-            "🏠 Seal air leaks around windows and doors to improve insulation."
+            "[TIP] Turn off lights when leaving a room to save energy.",
+            "[TIP] Set your thermostat 2-3 degrees lower in winter and higher in summer.",
+            "[TIP] Unplug devices when not in use to avoid phantom power drain.",
+            "[TIP] Take shorter showers to reduce water heating costs.",
+            "[TIP] Run dishwasher and washing machine only with full loads.",
+            "[TIP] Keep refrigerator temperature at 37-40°F for optimal efficiency.",
+            "[TIP] Enable power-saving mode on computers and monitors.",
+            "[TIP] Use natural light during the day instead of artificial lighting.",
+            "[TIP] Charge devices during off-peak hours for lower rates.",
+            "[TIP] Seal air leaks around windows and doors to improve insulation."
         ]
         
         # Return a random tip
@@ -231,10 +231,10 @@ def main():
     print("="*60)
     
     # Load data
-    print("\n📂 Loading data...")
+    print("\n[INFO] Loading data...")
     df = pd.read_csv('data/processed/energy_data_clean.csv',
                      index_col='time', parse_dates=True)
-    print(f"   ✓ Loaded {len(df):,} records")
+    print(f"   [OK] Loaded {len(df):,} records")
     
     # Initialize suggestions engine
     engine = SmartSuggestionsEngine(df)
@@ -283,10 +283,10 @@ def main():
     
     # Get daily tip
     daily_tip = engine.get_daily_tips()
-    print(f"\n   💡 Daily Tip: {daily_tip}")
+    print(f"\n   [TIP] Daily Tip: {daily_tip}")
     
     print("\n" + "="*60)
-    print("✓ SUGGESTIONS ENGINE COMPLETE!")
+    print("[OK] SUGGESTIONS ENGINE COMPLETE!")
     print("="*60)
     
     return engine, suggestions

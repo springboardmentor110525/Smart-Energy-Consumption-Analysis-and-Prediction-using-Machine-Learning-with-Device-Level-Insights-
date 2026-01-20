@@ -29,26 +29,26 @@ class DataPreprocessor:
         
     def load_data(self):
         """Load dataset from CSV file"""
-        print("📂 Loading dataset...")
+        print("[INFO] Loading dataset...")
         try:
             self.df = pd.read_csv(self.data_path)
-            print(f"✓ Dataset loaded successfully!")
+            print(f"[OK] Dataset loaded successfully!")
             print(f"  Shape: {self.df.shape}")
             print(f"  Columns: {len(self.df.columns)}")
             print(f"  Memory usage: {self.df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
             return self.df
         except Exception as e:
-            print(f"✗ Error loading dataset: {e}")
+            print(f"[ERROR] Error loading dataset: {e}")
             return None
     
     def explore_data(self):
         """Perform exploratory data analysis"""
         if self.df is None:
-            print("✗ Please load data first!")
+            print("[ERROR] Please load data first!")
             return
         
         print("\n" + "="*60)
-        print("📊 EXPLORATORY DATA ANALYSIS")
+        print(" EXPLORATORY DATA ANALYSIS")
         print("="*60)
         
         # Basic info
@@ -65,7 +65,7 @@ class DataPreprocessor:
         print("\n3. Missing Values:")
         missing = self.df.isnull().sum()
         if missing.sum() == 0:
-            print("   ✓ No missing values found!")
+            print("   [OK] No missing values found!")
         else:
             print(missing[missing > 0])
         
@@ -78,11 +78,11 @@ class DataPreprocessor:
     def clean_data(self):
         """Clean and preprocess the dataset"""
         if self.df is None:
-            print("✗ Please load data first!")
+            print("[ERROR] Please load data first!")
             return
         
         print("\n" + "="*60)
-        print("🧹 DATA CLEANING")
+        print("[INFO] DATA CLEANING")
         print("="*60)
         
         # Create a copy
@@ -92,7 +92,7 @@ class DataPreprocessor:
         print("\n1. Converting timestamps...")
         self.df_clean['time'] = pd.to_datetime(self.df_clean['time'])
         self.df_clean.set_index('time', inplace=True)
-        print("   ✓ Timestamps converted and set as index")
+        print("   [OK] Timestamps converted and set as index")
         
         # 2. Handle missing values
         print("\n2. Handling missing values...")
@@ -106,14 +106,14 @@ class DataPreprocessor:
         self.df_clean.fillna(0, inplace=True)
         
         missing_after = self.df_clean.isnull().sum().sum()
-        print(f"   ✓ Missing values: {missing_before} → {missing_after}")
+        print(f"   [OK] Missing values: {missing_before} -> {missing_after}")
         
         # 3. Remove duplicates
         print("\n3. Removing duplicates...")
         duplicates_before = self.df_clean.duplicated().sum()
         self.df_clean.drop_duplicates(inplace=True)
         duplicates_after = self.df_clean.duplicated().sum()
-        print(f"   ✓ Duplicates: {duplicates_before} → {duplicates_after}")
+        print(f"   [OK] Duplicates: {duplicates_before} -> {duplicates_after}")
         
         # 4. Handle outliers (using IQR method)
         print("\n4. Handling outliers...")
@@ -137,16 +137,16 @@ class DataPreprocessor:
                                                           upper=upper_bound)
             outliers_removed += outliers_count
         
-        print(f"   ✓ Outliers capped: {outliers_removed}")
+        print(f"   [OK] Outliers capped: {outliers_removed}")
         
         # 5. Drop unnecessary columns
         print("\n5. Dropping unnecessary columns...")
         cols_to_drop = ['Unnamed: 0'] if 'Unnamed: 0' in self.df_clean.columns else []
         if cols_to_drop:
             self.df_clean.drop(columns=cols_to_drop, inplace=True)
-            print(f"   ✓ Dropped columns: {cols_to_drop}")
+            print(f"   [OK] Dropped columns: {cols_to_drop}")
         
-        print(f"\n✓ Data cleaning complete!")
+        print(f"\n[OK] Data cleaning complete!")
         print(f"  Final shape: {self.df_clean.shape}")
         
         return self.df_clean
@@ -159,60 +159,60 @@ class DataPreprocessor:
             freq: Resampling frequency ('H'=hourly, 'D'=daily, 'W'=weekly, 'M'=monthly)
         """
         if self.df_clean is None:
-            print("✗ Please clean data first!")
+            print("[ERROR] Please clean data first!")
             return
         
-        print(f"\n📊 Resampling data to {freq} frequency...")
+        print(f"\n[INFO] Resampling data to {freq} frequency...")
         
         # Resample numeric columns
         df_resampled = self.df_clean.select_dtypes(include=[np.number]).resample(freq).mean()
         
-        print(f"   ✓ Resampled shape: {df_resampled.shape}")
+        print(f"   [OK] Resampled shape: {df_resampled.shape}")
         
         return df_resampled
     
     def create_aggregations(self):
         """Create useful aggregations for analysis"""
         if self.df_clean is None:
-            print("✗ Please clean data first!")
+            print("[ERROR] Please clean data first!")
             return
         
-        print("\n📈 Creating aggregations...")
+        print("\n[INFO] Creating aggregations...")
         
         aggregations = {}
         
         # Hourly aggregation
         aggregations['hourly'] = self.resample_data('H')
-        print("   ✓ Hourly aggregation created")
+        print("   [OK] Hourly aggregation created")
         
         # Daily aggregation
         aggregations['daily'] = self.resample_data('D')
-        print("   ✓ Daily aggregation created")
+        print("   [OK] Daily aggregation created")
         
         # Weekly aggregation
         aggregations['weekly'] = self.resample_data('W')
-        print("   ✓ Weekly aggregation created")
+        print("   [OK] Weekly aggregation created")
         
         # Monthly aggregation
         aggregations['monthly'] = self.resample_data('M')
-        print("   ✓ Monthly aggregation created")
+        print("   [OK] Monthly aggregation created")
         
         return aggregations
     
     def save_processed_data(self, output_path):
         """Save processed data to CSV"""
         if self.df_clean is None:
-            print("✗ No processed data to save!")
+            print("[ERROR] No processed data to save!")
             return
         
-        print(f"\n💾 Saving processed data to {output_path}...")
+        print(f"\n[INFO] Saving processed data to {output_path}...")
         self.df_clean.to_csv(output_path)
-        print("   ✓ Data saved successfully!")
+        print("   [OK] Data saved successfully!")
     
     def visualize_data_quality(self):
         """Visualize data quality metrics"""
         if self.df is None:
-            print("✗ Please load data first!")
+            print("[ERROR] Please load data first!")
             return
         
         fig, axes = plt.subplots(2, 2, figsize=(15, 10))
@@ -244,7 +244,7 @@ class DataPreprocessor:
         
         plt.tight_layout()
         plt.savefig('reports/figures/data_quality.png', dpi=100, bbox_inches='tight')
-        print("✓ Data quality visualization saved to reports/figures/data_quality.png")
+        print("[OK] Data quality visualization saved to reports/figures/data_quality.png")
         plt.show()
 
 
@@ -277,7 +277,7 @@ def main():
         # preprocessor.visualize_data_quality()
         
         print("\n" + "="*60)
-        print("✓ DATA PREPROCESSING COMPLETE!")
+        print("[OK] DATA PREPROCESSING COMPLETE!")
         print("="*60)
         
         return preprocessor, aggregations

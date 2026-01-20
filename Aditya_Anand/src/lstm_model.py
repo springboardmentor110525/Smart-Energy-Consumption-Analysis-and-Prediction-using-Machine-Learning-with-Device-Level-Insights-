@@ -65,7 +65,7 @@ class LSTMEnergyModel:
             target_col: Target variable column
             test_size: Test set proportion
         """
-        print("\n📊 Preparing data for LSTM model...")
+        print("\n[INFO] Preparing data for LSTM model...")
         
         # Extract target column
         data = df[target_col].values.reshape(-1, 1)
@@ -86,11 +86,11 @@ class LSTMEnergyModel:
         self.y_train = y[:split_idx]
         self.y_test = y[split_idx:]
         
-        print(f"   ✓ Sequence length: {self.sequence_length}")
-        print(f"   ✓ Training sequences: {len(self.X_train):,}")
-        print(f"   ✓ Test sequences: {len(self.X_test):,}")
-        print(f"   ✓ X shape: {self.X_train.shape}")
-        print(f"   ✓ y shape: {self.y_train.shape}")
+        print(f"   [OK] Sequence length: {self.sequence_length}")
+        print(f"   [OK] Training sequences: {len(self.X_train):,}")
+        print(f"   [OK] Test sequences: {len(self.X_test):,}")
+        print(f"   [OK] X shape: {self.X_train.shape}")
+        print(f"   [OK] y shape: {self.y_train.shape}")
         
         return self.X_train, self.X_test, self.y_train, self.y_test
     
@@ -103,7 +103,7 @@ class LSTMEnergyModel:
             dropout: Dropout rate
             learning_rate: Learning rate for optimizer
         """
-        print("\n🏗️ Building LSTM model architecture...")
+        print("\n[INFO] Building LSTM model architecture...")
         
         self.model = Sequential([
             # First LSTM layer
@@ -133,7 +133,7 @@ class LSTMEnergyModel:
         optimizer = keras.optimizers.Adam(learning_rate=learning_rate)
         self.model.compile(optimizer=optimizer, loss='mse', metrics=['mae'])
         
-        print("   ✓ Model architecture:")
+        print("   [OK] Model architecture:")
         self.model.summary()
         
         return self.model
@@ -147,13 +147,13 @@ class LSTMEnergyModel:
             batch_size: Batch size
             validation_split: Validation data proportion
         """
-        print(f"\n🎯 Training LSTM model...")
+        print(f"\n[INFO] Training LSTM model...")
         print(f"   Epochs: {epochs}")
         print(f"   Batch size: {batch_size}")
         print(f"   Validation split: {validation_split}")
         
         if self.model is None:
-            print("   ✗ Please build model first!")
+            print("   [ERROR] Please build model first!")
             return
         
         # Callbacks
@@ -189,16 +189,16 @@ class LSTMEnergyModel:
             verbose=1
         )
         
-        print("\n   ✓ Training complete!")
+        print("\n   [OK] Training complete!")
         
         return self.history
     
     def predict(self):
         """Make predictions on test set"""
-        print("\n🔮 Making predictions...")
+        print("\n[INFO] Making predictions...")
         
         if self.model is None:
-            print("   ✗ Please train model first!")
+            print("   [ERROR] Please train model first!")
             return
         
         # Predict
@@ -208,16 +208,16 @@ class LSTMEnergyModel:
         self.predictions = self.scaler.inverse_transform(predictions_scaled)
         y_test_original = self.scaler.inverse_transform(self.y_test)
         
-        print(f"   ✓ Generated {len(self.predictions):,} predictions")
+        print(f"   [OK] Generated {len(self.predictions):,} predictions")
         
         return self.predictions, y_test_original
     
     def evaluate(self):
         """Evaluate model performance"""
-        print("\n📈 Evaluating LSTM model performance...")
+        print("\n[INFO] Evaluating LSTM model performance...")
         
         if self.predictions is None:
-            print("   ✗ Please make predictions first!")
+            print("   [ERROR] Please make predictions first!")
             return
         
         # Get original scale values
@@ -252,7 +252,7 @@ class LSTMEnergyModel:
     
     def visualize_training(self, save_path='reports/figures/lstm_training.png'):
         """Visualize training history"""
-        print("\n📊 Creating training visualizations...")
+        print("\n[INFO] Creating training visualizations...")
         
         fig, axes = plt.subplots(1, 2, figsize=(15, 5))
         
@@ -276,12 +276,12 @@ class LSTMEnergyModel:
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=100, bbox_inches='tight')
-        print(f"   ✓ Training visualization saved to {save_path}")
+        print(f"   [OK] Training visualization saved to {save_path}")
         plt.show()
     
     def visualize_predictions(self, save_path='reports/figures/lstm_predictions.png'):
         """Visualize predictions"""
-        print("\n📊 Creating prediction visualizations...")
+        print("\n[INFO] Creating prediction visualizations...")
         
         y_test_original = self.scaler.inverse_transform(self.y_test)
         
@@ -328,28 +328,28 @@ class LSTMEnergyModel:
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=100, bbox_inches='tight')
-        print(f"   ✓ Prediction visualization saved to {save_path}")
+        print(f"   [OK] Prediction visualization saved to {save_path}")
         plt.show()
     
     def save_model(self, model_path='models/best_lstm_model.h5', 
                    scaler_path='models/lstm_scaler.pkl'):
         """Save model and scaler"""
         if self.model is None:
-            print("   ✗ No model to save!")
+            print("   [ERROR] No model to save!")
             return
         
         self.model.save(model_path)
         joblib.dump(self.scaler, scaler_path)
-        print(f"   ✓ Model saved to {model_path}")
-        print(f"   ✓ Scaler saved to {scaler_path}")
+        print(f"   [OK] Model saved to {model_path}")
+        print(f"   [OK] Scaler saved to {scaler_path}")
     
     def load_model(self, model_path='models/best_lstm_model.h5',
                    scaler_path='models/lstm_scaler.pkl'):
         """Load model and scaler"""
         self.model = keras.models.load_model(model_path)
         self.scaler = joblib.load(scaler_path)
-        print(f"   ✓ Model loaded from {model_path}")
-        print(f"   ✓ Scaler loaded from {scaler_path}")
+        print(f"   [OK] Model loaded from {model_path}")
+        print(f"   [OK] Scaler loaded from {scaler_path}")
 
 
 def main():
@@ -359,10 +359,10 @@ def main():
     print("="*60)
     
     # Load data
-    print("\n📂 Loading data...")
+    print("\n[INFO] Loading data...")
     df = pd.read_csv('data/processed/energy_data_clean.csv',
                      index_col='time', parse_dates=True)
-    print(f"   ✓ Loaded {len(df):,} records")
+    print(f"   [OK] Loaded {len(df):,} records")
     
     # Initialize LSTM model
     lstm_model = LSTMEnergyModel(sequence_length=24)
@@ -397,10 +397,10 @@ def main():
     # Save metrics
     metrics_df = pd.DataFrame([metrics])
     metrics_df.to_csv('reports/results/lstm_metrics.csv', index=False)
-    print(f"\n   ✓ Metrics saved to reports/results/lstm_metrics.csv")
+    print(f"\n   [OK] Metrics saved to reports/results/lstm_metrics.csv")
     
     print("\n" + "="*60)
-    print("✓ LSTM MODEL TRAINING COMPLETE!")
+    print("[OK] LSTM MODEL TRAINING COMPLETE!")
     print("="*60)
     
     return lstm_model, metrics
