@@ -13,7 +13,7 @@ This project analyzes smart home energy data to detect usage patterns and foreca
 - **Libraries**: Pandas, NumPy, Seaborn, Matplotlib, TensorFlow/Keras, Flask, Scikit-learn
 - **Dataset**: SmartHome Energy Monitoring Dataset (`HomeC_augmented.csv`)
 
-## Current Progress (Milestone 1 & 2)
+## Current Progress 
 - [x] Data Collection & Cleaning
 - [x] Handling Null Values & Duplicates
 - [x] Exploratory Data Analysis (EDA)
