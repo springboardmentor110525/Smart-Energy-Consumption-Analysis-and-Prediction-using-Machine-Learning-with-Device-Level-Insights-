@@ -11,11 +11,6 @@ A full-stack Machine Learning application that forecasts home energy usage, dete
 
 ---
 
-## 📸 Dashboard Preview
-![Dashboard Screenshot](https://via.placeholder.com/800x400?text=Insert+Your+Dashboard+Screenshot+Here)
-
----
-
 ## 🚀 Key Features
 * **🧠 Deep Learning Core:** Uses **Long Short-Term Memory (LSTM)** networks to capture complex time-series patterns.
 * **🔮 Real-Time Forecasting:** Predicts energy consumption for the **Next Hour, Week, and Month**.
@@ -54,3 +49,4 @@ Smart-Energy-Analysis/
 │   └── index.html          # Frontend UI
 ├── static/                 # CSS/JS files
 └── notebooks/              # Jupyter Notebooks for Training
+
