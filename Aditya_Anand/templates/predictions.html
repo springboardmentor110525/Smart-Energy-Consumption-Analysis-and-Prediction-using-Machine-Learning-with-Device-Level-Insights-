@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Predictions - Smart Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .prediction-modes {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .mode-card {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .mode-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .mode-card h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .mode-card p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .performance-table th,
+        .performance-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .performance-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .performance-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-value.highlight {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>⚡ Smart Energy Analysis</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/predictions" class="active">Predictions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="predictions-container">
+        <div class="container">
+            <h1 class="page-title">Energy Consumption Predictions</h1>
+
+            <!-- Prediction Modes -->
+            <div class="prediction-modes">
+                <div class="mode-card active" id="modeQuick" onclick="switchMode('quick')">
+                    <h3>🚀 Quick Prediction</h3>
+                    <p>Get instant prediction using latest data</p>
+                </div>
+                <div class="mode-card" id="modeCustom" onclick="switchMode('custom')">
+                    <h3>⚙️ Custom Input</h3>
+                    <p>Enter your own values for prediction</p>
+                </div>
+            </div>
+
+            <!-- Quick Prediction Section -->
+            <div id="quickPredictionSection">
+                <div class="prediction-controls">
+                    <div class="control-group">
+                        <label for="modelSelect">Select Model:</label>
+                        <select id="modelSelect">
+                            <option value="baseline" selected>Linear Regression (Baseline)</option>
+                            <option value="lstm">LSTM Neural Network</option>
+                        </select>
+                    </div>
+                    <button id="predictBtn" class="btn btn-primary">Generate Prediction</button>
+                </div>
+            </div>
+
+            <!-- Custom Input Section -->
+            <div id="customInputSection" class="hidden">
+                <h2>Enter Custom Values</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="temperature">Temperature (°F)</label>
+                        <input type="number" id="temperature" step="0.1" value="70" min="0" max="120">
+                    </div>
+                    <div class="input-group">
+                        <label for="humidity">Humidity (0-1)</label>
+                        <input type="number" id="humidity" step="0.01" value="0.65" min="0" max="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="hour">Hour of Day (0-23)</label>
+                        <input type="number" id="hour" value="12" min="0" max="23">
+                    </div>
+                    <div class="input-group">
+                        <label for="month">Month (1-12)</label>
+                        <input type="number" id="month" value="6" min="1" max="12">
+                    </div>
+                    <div class="input-group">
+                        <label for="weekday">Day of Week</label>
+                        <select id="weekday">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="windSpeed">Wind Speed (mph)</label>
+                        <input type="number" id="windSpeed" step="0.1" value="6.5" min="0" max="50">
+                    </div>
+                    <div class="input-group">
+                        <label for="cloudCover">Cloud Cover (0-1)</label>
+                        <input type="number" id="cloudCover" step="0.01" value="0.3" min="0" max="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="visibility">Visibility (miles)</label>
+                        <input type="number" id="visibility" step="0.1" value="10" min="0" max="10">
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button id="predictCustomBtn" class="btn btn-primary">Predict with Custom Values</button>
+                    <button id="resetBtn" class="btn btn-secondary">Reset to Defaults</button>
+                </div>
+            </div>
+
+            <!-- Prediction Result -->
+            <div id="predictionResult" class="prediction-result" style="display: none;">
+                <h3>Prediction Result</h3>
+                <div class="result-card">
+                    <div class="result-item">
+                        <span class="result-label">Model Used:</span>
+                        <span class="result-value" id="modelUsed">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Predicted Consumption:</span>
+                        <span class="result-value highlight" id="predictedValue">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Timestamp:</span>
+                        <span class="result-value" id="timestamp">-</span>
+                    </div>
+                    <div class="result-item" id="avgConsumptionRow" style="display: none;">
+                        <span class="result-label">Average Consumption:</span>
+                        <span class="result-value" id="avgConsumption">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Performance Comparison -->
+            <div class="model-performance">
+                <h2>Model Performance Comparison</h2>
+                <div id="performanceContainer">
+                    <p>Loading model performance metrics...</p>
+                </div>
+            </div>
+
+            <!-- Information Section -->
+            <div class="info-section">
+                <h2>About the Models</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🤖 LSTM Neural Network</h3>
+                        <p>Long Short-Term Memory (LSTM) is a type of recurrent neural network designed for time series
+                            forecasting. It can learn complex patterns and dependencies in energy consumption data.</p>
+                        <ul>
+                            <li>✓ Handles sequential data effectively</li>
+                            <li>✓ Captures long-term dependencies</li>
+                            <li>✓ Target accuracy: 85-95%</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3>📊 Linear Regression</h3>
+                        <p>A baseline statistical model that establishes a linear relationship between features and
+                            energy consumption. Fast and interpretable.</p>
+                        <ul>
+                            <li>✓ Simple and interpretable</li>
+                            <li>✓ Fast training and prediction</li>
+                            <li>✓ Baseline accuracy: 75-85%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Smart Energy Analysis System</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentMode = 'quick';
+
+        // Switch between prediction modes
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // Update UI
+            document.getElementById('modeQuick').classList.toggle('active', mode === 'quick');
+            document.getElementById('modeCustom').classList.toggle('active', mode === 'custom');
+            document.getElementById('quickPredictionSection').classList.toggle('hidden', mode !== 'quick');
+            document.getElementById('customInputSection').classList.toggle('hidden', mode !== 'custom');
+        }
+
+        // Quick prediction
+        document.getElementById('predictBtn').addEventListener('click', async () => {
+            const modelType = document.getElementById('modelSelect').value;
+            const btn = document.getElementById('predictBtn');
+
+            btn.textContent = 'Generating...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ model_type: modelType })
+                });
+
+                const data = await response.json();
+
+                // Check if response has error
+                if (data.error) {
+                    console.error('Prediction error:', data);
+                    let errorMsg = `Error: ${data.error}`;
+                    if (data.suggestion) {
+                        errorMsg += `\n\nSuggestion: ${data.suggestion}`;
+                    }
+                    if (data.details) {
+                        console.error('Error details:', data.details);
+                    }
+                    alert(errorMsg);
+                    return;
+                }
+
+                displayPredictionResult(data);
+
+            } catch (error) {
+                console.error('Error generating prediction:', error);
+                alert('Error generating prediction. Please check:\n\n' +
+                    '1. Data preprocessing is complete\n' +
+                    '2. Model training is complete\n' +
+                    '3. App is running properly\n\n' +
+                    'Error: ' + error.message);
+            } finally {
+                btn.textContent = 'Generate Prediction';
+                btn.disabled = false;
+            }
+        });
+
+        // Custom prediction
+        document.getElementById('predictCustomBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('predictCustomBtn');
+
+            // Collect custom input values
+            const customData = {
+                model_type: 'baseline',
+                custom_input: {
+                    temperature: parseFloat(document.getElementById('temperature').value),
+                    humidity: parseFloat(document.getElementById('humidity').value),
+                    hour: parseInt(document.getElementById('hour').value),
+                    month: parseInt(document.getElementById('month').value),
+                    weekday: parseInt(document.getElementById('weekday').value),
+                    windSpeed: parseFloat(document.getElementById('windSpeed').value),
+                    cloudCover: parseFloat(document.getElementById('cloudCover').value),
+                    visibility: parseFloat(document.getElementById('visibility').value)
+                }
+            };
+
+            btn.textContent = 'Predicting...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(customData)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error: ${data.error}\n\n${data.suggestion || ''}`);
+                    return;
+                }
+
+                displayPredictionResult(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating prediction: ' + error.message);
+            } finally {
+                btn.textContent = 'Predict with Custom Values';
+                btn.disabled = false;
+            }
+        });
+
+        // Reset custom inputs
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            document.getElementById('temperature').value = 70;
+            document.getElementById('humidity').value = 0.65;
+            document.getElementById('hour').value = 12;
+            document.getElementById('month').value = 6;
+            document.getElementById('weekday').value = 0;
+            document.getElementById('windSpeed').value = 6.5;
+            document.getElementById('cloudCover').value = 0.3;
+            document.getElementById('visibility').value = 10;
+        });
+
+        // Display prediction result
+        function displayPredictionResult(data) {
+            document.getElementById('modelUsed').textContent = data.model || 'Unknown';
+            document.getElementById('predictedValue').textContent =
+                `${data.prediction.toFixed(4)} ${data.unit}`;
+            document.getElementById('timestamp').textContent =
+                new Date(data.timestamp).toLocaleString();
+
+            // Show additional info if available
+            if (data.confidence) {
+                document.getElementById('modelUsed').textContent += ` (${data.confidence} accuracy)`;
+            }
+
+            if (data.average_consumption) {
+                document.getElementById('avgConsumption').textContent =
+                    `${data.average_consumption.toFixed(4)} kW`;
+                document.getElementById('avgConsumptionRow').style.display = 'flex';
+            } else {
+                document.getElementById('avgConsumptionRow').style.display = 'none';
+            }
+
+            document.getElementById('predictionResult').style.display = 'block';
+        }
+
+        // Load model performance
+        async function loadModelPerformance() {
+            try {
+                const response = await fetch('/api/model-performance');
+                const data = await response.json();
+
+                const container = document.getElementById('performanceContainer');
+                container.innerHTML = '';
+
+                if (Object.keys(data).length === 0) {
+                    container.innerHTML = '<p>No model performance data available. Train models to see metrics.</p>';
+                    return;
+                }
+
+                const table = document.createElement('table');
+                table.className = 'performance-table';
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Baseline (Linear Regression)</th>
+                            <th>LSTM Neural Network</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>RMSE</td>
+                            <td>${data.baseline?.RMSE?.toFixed(6) || 'N/A'}</td>
+                            <td>${data.lstm?.RMSE?.toFixed(6) || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td>MAE</td>
+                            <td>${data.baseline?.MAE?.toFixed(6) || 'N/A'}</td>
+                            <td>${data.lstm?.MAE?.toFixed(6) || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td>R² Score</td>
+                            <td>${data.baseline?.R2?.toFixed(6) || 'N/A'}</td>
+                            <td>${data.lstm?.R2?.toFixed(6) || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td>MAPE (%)</td>
+                            <td>${data.baseline?.MAPE?.toFixed(2) || 'N/A'}%</td>
+                            <td>${data.lstm?.MAPE?.toFixed(2) || 'N/A'}%</td>
+                        </tr>
+                    </tbody>
+                `;
+
+                container.appendChild(table);
+
+            } catch (error) {
+                console.error('Error loading model performance:', error);
+                document.getElementById('performanceContainer').innerHTML =
+                    '<p>Model performance metrics will be available after training.</p>';
+            }
+        }
+
+        // Load performance on page load
+        window.addEventListener('load', loadModelPerformance);
+    </script>
+</body>
+
+</html>

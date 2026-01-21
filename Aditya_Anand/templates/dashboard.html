@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Dashboard - Smart Energy Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>⚡ Smart Energy Analysis</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard" class="active">Dashboard</a></li>
+                <li><a href="/predictions">Predictions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="container">
+            <h1 class="page-title">Energy Consumption Dashboard</h1>
+
+            <!-- Charts Section -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Device-Wise Consumption</h3>
+                    <canvas id="deviceChart"></canvas>
+                    <div id="deviceError" style="display:none; padding:20px; text-align:center; color:#ef4444;"></div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Hourly Consumption Pattern</h3>
+                    <canvas id="hourlyChart"></canvas>
+                    <div id="hourlyError" style="display:none; padding:20px; text-align:center; color:#ef4444;"></div>
+                </div>
+
+                <div class="chart-card full-width">
+                    <h3>Daily Consumption Trend (Last 30 Days)</h3>
+                    <canvas id="dailyChart"></canvas>
+                    <div id="dailyError" style="display:none; padding:20px; text-align:center; color:#ef4444;"></div>
+                </div>
+            </div>
+
+            <!-- Suggestions Section -->
+            <div class="suggestions-section">
+                <h2>💡 Smart Energy-Saving Suggestions</h2>
+                <div id="suggestionsContainer">
+                    <p>Loading suggestions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Smart Energy Analysis System</p>
+        </div>
+    </footer>
+
+    <script>
+        let deviceChart, hourlyChart, dailyChart;
+
+        // Load device consumption data
+        async function loadDeviceConsumption() {
+            try {
+                const response = await fetch('/api/device-consumption');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                const labels = Object.keys(data);
+                const values = Object.values(data);
+
+                const ctx = document.getElementById('deviceChart').getContext('2d');
+                deviceChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Energy Consumption (kWh)',
+                            data: values,
+                            backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Consumption (kWh)'
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('✓ Device chart loaded');
+            } catch (error) {
+                console.error('✗ Error loading device chart:', error);
+                document.getElementById('deviceChart').style.display = 'none';
+                const errorDiv = document.getElementById('deviceError');
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = `<strong>⚠️ Unable to load chart</strong><br><small>${error.message}</small>`;
+            }
+        }
+
+        // Load hourly consumption data
+        async function loadHourlyConsumption() {
+            try {
+                console.log('Loading hourly consumption...');
+                const response = await fetch('/api/hourly-consumption');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Hourly data received:', data);
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                if (!data.hours || !data.consumption) {
+                    throw new Error('Invalid data structure');
+                }
+
+                const ctx = document.getElementById('hourlyChart').getContext('2d');
+                hourlyChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.hours.map(h => `${h}:00`),
+                        datasets: [{
+                            label: 'Average Consumption (kW)',
+                            data: data.consumption,
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Consumption (kW)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Hour of Day'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        }
+                    }
+                });
+                console.log('✓ Hourly chart loaded successfully');
+            } catch (error) {
+                console.error('✗ Error loading hourly chart:', error);
+                document.getElementById('hourlyChart').style.display = 'none';
+                const errorDiv = document.getElementById('hourlyError');
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = `
+                    <strong>⚠️ Unable to load hourly consumption chart</strong><br>
+                    <small>${error.message}</small><br>
+                    <small style="color:#6b7280;">Please ensure data preprocessing is complete.</small>
+                `;
+            }
+        }
+
+        // Load daily consumption data
+        async function loadDailyConsumption() {
+            try {
+                const response = await fetch('/api/daily-consumption');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                const ctx = document.getElementById('dailyChart').getContext('2d');
+                dailyChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: 'Daily Consumption (kWh)',
+                            data: data.consumption,
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Consumption (kWh)'
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('✓ Daily chart loaded');
+            } catch (error) {
+                console.error('✗ Error loading daily chart:', error);
+                document.getElementById('dailyChart').style.display = 'none';
+                const errorDiv = document.getElementById('dailyError');
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = `<strong>⚠️ Unable to load chart</strong><br><small>${error.message}</small>`;
+            }
+        }
+
+        // Load suggestions
+        async function loadSuggestions() {
+            try {
+                const response = await fetch('/api/suggestions');
+                const suggestions = await response.json();
+
+                const container = document.getElementById('suggestionsContainer');
+                container.innerHTML = '';
+
+                if (suggestions.length === 0) {
+                    container.innerHTML = '<p>No suggestions available at this time.</p>';
+                    return;
+                }
+
+                suggestions.forEach((suggestion, index) => {
+                    const card = document.createElement('div');
+                    card.className = `suggestion-card severity-${suggestion.severity.toLowerCase()}`;
+                    card.innerHTML = `
+                        <div class="suggestion-header">
+                            <span class="suggestion-device">${suggestion.device}</span>
+                            <span class="suggestion-severity ${suggestion.severity.toLowerCase()}">${suggestion.severity}</span>
+                        </div>
+                        <div class="suggestion-type">${suggestion.type}</div>
+                        <div class="suggestion-text">${suggestion.suggestion}</div>
+                        <div class="suggestion-savings">💰 Potential Savings: ${suggestion.potential_savings}</div>
+                    `;
+                    container.appendChild(card);
+                });
+                console.log('✓ Suggestions loaded');
+            } catch (error) {
+                console.error('✗ Error loading suggestions:', error);
+                document.getElementById('suggestionsContainer').innerHTML =
+                    '<p>Unable to load suggestions at this time.</p>';
+            }
+        }
+
+        // Load all data on page load
+        window.addEventListener('load', () => {
+            console.log('=== Loading Dashboard ===');
+            loadDeviceConsumption();
+            loadHourlyConsumption();
+            loadDailyConsumption();
+            loadSuggestions();
+        });
+    </script>
+</body>
+
+</html>
