@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Energy Usage Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>⚡ Smart Energy Usage Analyzer</h1>
+    <p class="subtitle">Enter device-wise power consumption (in Watts)</p>
+
+    <form id="energyForm">
+        <div class="grid">
+            <div>
+                <label>Air Conditioner (W)</label>
+                <input type="number" id="ac" required>
+            </div>
+            <div>
+                <label>Fan (W)</label>
+                <input type="number" id="fan" required>
+            </div>
+            <div>
+                <label>Fridge (W)</label>
+                <input type="number" id="fridge" required>
+            </div>
+            <div>
+                <label>TV (W)</label>
+                <input type="number" id="tv" required>
+            </div>
+            <div>
+                <label>Washing Machine (W)</label>
+                <input type="number" id="wm" required>
+            </div>
+        </div>
+
+        <button type="submit">Analyze Energy Usage</button>
+    </form>
+
+    <div id="results" style="display:none;">
+        <h2>📊 Analysis Result</h2>
+
+        <div class="cards">
+            <div class="card high">
+                <h3>Highest Consumption</h3>
+                <p id="highDevice"></p>
+            </div>
+            <div class="card low">
+                <h3>Lowest Consumption</h3>
+                <p id="lowDevice"></p>
+            </div>
+        </div>
+
+        <h3>🔌 Device Readings</h3>
+        <table>
+            <thead>
+                <tr><th>Device</th><th>Watts</th></tr>
+            </thead>
+            <tbody id="deviceTable"></tbody>
+        </table>
+
+        <h3>💡 Smart Energy Saving Tips</h3>
+        <div id="tips" class="tips"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
