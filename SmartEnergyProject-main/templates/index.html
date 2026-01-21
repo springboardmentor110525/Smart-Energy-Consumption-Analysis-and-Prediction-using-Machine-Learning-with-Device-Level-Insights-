@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Energy Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<h1 class="title">⚡ Smart Energy Consumption Dashboard</h1>
+
+<!-- NAVIGATION CARDS -->
+<div class="nav-row">
+    <div class="card nav-card">
+        <a href="/predict" style="text-decoration:none; color:inherit;">
+            🔮 Prediction Portal
+        </a>
+    </div>
+
+    <div class="card nav-card">
+        <a href="/compare" style="text-decoration:none; color:inherit;">
+            🆚 Appliance Comparison
+        </a>
+    </div>
+</div>
+
+<!-- INSIGHT CARDS -->
+<div class="cards">
+    <div class="card">
+        <h3>Top Appliance</h3>
+        <p>{{ top_appliance }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Highest Usage</h3>
+        <p>{{ highest_usage }} Wh</p>
+    </div>
+
+    <div class="card">
+        <h3>Peak Hour</h3>
+        <p>{{ peak_hour }}</p>
+    </div>
+</div>
+
+<!-- SMART SUGGESTIONS (WASHING MACHINE) -->
+{% if washing_suggestions %}
+<div class="insight-text">
+    <h3>💡 Smart Suggestions to Reduce Washing Machine Energy</h3>
+    <ul>
+        {% for tip in washing_suggestions %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
+<!-- ESTIMATED SAVINGS -->
+{% if washing_savings %}
+<div class="insight-text">
+    <p>📉 <strong>Estimated Savings:</strong> {{ washing_savings }}</p>
+</div>
+{% endif %}
+
+<!-- SIDE-BY-SIDE CHARTS -->
+<div class="chart-row">
+
+    <!-- HOURLY BAR CHART -->
+    <div class="chart-box half"
+         data-labels="{{ labels }}"
+         data-values="{{ values }}">
+
+        <h2>Hourly Energy Consumption</h2>
+        <canvas id="hourlyChart"></canvas>
+    </div>
+
+    <!-- APPLIANCE PIE CHART -->
+    <div class="chart-box half"
+         data-applabels="{{ appliance_labels }}"
+         data-appvalues="{{ appliance_values }}">
+
+        <h2>Appliance-wise Energy Distribution</h2>
+        <canvas id="appliancePieChart"></canvas>
+    </div>
+
+</div>
+
+<script>
+    /* -------------------------
+       HOURLY BAR CHART
+    -------------------------- */
+    const barBox = document.querySelector("[data-labels]");
+    const barLabels = barBox.dataset.labels.split(",");
+    const barValues = barBox.dataset.values.split(",").map(Number);
+
+    new Chart(document.getElementById("hourlyChart"), {
+        type: "bar",
+        data: {
+            labels: barLabels,
+            datasets: [{
+                label: "Energy Consumption (Wh)",
+                data: barValues,
+                backgroundColor: "#4f46e5"
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    /* -------------------------
+       APPLIANCE PIE CHART
+    -------------------------- */
+    const pieBox = document.querySelector("[data-applabels]");
+    const pieLabels = pieBox.dataset.applabels.split(",");
+    const pieValues = pieBox.dataset.appvalues.split(",").map(Number);
+
+    new Chart(document.getElementById("appliancePieChart"), {
+        type: "pie",
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieValues,
+                backgroundColor: [
+                    "#6366f1", "#22c55e", "#f97316",
+                    "#ef4444", "#0ea5e9", "#a855f7",
+                    "#eab308", "#14b8a6", "#f43f5e"
+                ]
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+
+</body>
+</html>

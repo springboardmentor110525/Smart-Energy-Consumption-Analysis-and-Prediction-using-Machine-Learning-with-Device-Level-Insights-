@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Energy Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<h1 class="title">⚡ Smart Energy Consumption Dashboard</h1>
+
+<div class="cards">
+    <div class="card">
+        <h3>Top Appliance</h3>
+        <p>{{ top_device }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Highest Usage</h3>
+        <p>{{ top_value }} Wh</p>
+    </div>
+
+    <div class="card">
+        <h3>Peak Hour</h3>
+        <p>{{ peak_hour }}:00 hrs</p>
+    </div>
+</div>
+
+<div class="chart-container">
+    <h2>Hourly Energy Consumption</h2>
+    <canvas id="hourlyChart"></canvas>
+</div>
+
+<div class="chart-container">
+    <h2>Daily Energy Consumption</h2>
+    <canvas id="dailyChart"></canvas>
+</div>
+
+<div class="chart-container">
+    <h2>Appliance-wise Consumption</h2>
+    <canvas id="applianceChart"></canvas>
+</div>
+
+<script>
+fetch("/dashboard-data")
+.then(response => response.json())
+.then(data => {
+
+    // ---------------- Hourly Chart ----------------
+    new Chart(document.getElementById("hourlyChart"), {
+        type: 'bar',
+        data: {
+            labels: [...Array(data.hourly.length).keys()],
+            datasets: [{
+                label: "Avg Energy (Wh)",
+                data: data.hourly,
+                backgroundColor: "#4CAF50"
+            }]
+        }
+    });
+
+    // ---------------- Daily Chart ----------------
+    new Chart(document.getElementById("dailyChart"), {
+        type: 'line',
+        data: {
+            labels: [...Array(data.daily.length).keys()],
+            datasets: [{
+                label: "Daily Energy (Wh)",
+                data: data.daily,
+                borderColor: "#2196F3",
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
+
+    // ---------------- Appliance Chart ----------------
+    new Chart(document.getElementById("applianceChart"), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(data.appliances),
+            datasets: [{
+                label: "Total Energy (Wh)",
+                data: Object.values(data.appliances),
+                backgroundColor: "#FF9800"
+            }]
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>

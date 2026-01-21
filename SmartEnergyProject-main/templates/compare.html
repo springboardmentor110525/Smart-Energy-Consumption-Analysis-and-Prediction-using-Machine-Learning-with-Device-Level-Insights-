@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Appliance Comparison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<h1 class="title">🆚 Appliance Energy Comparison</h1>
+
+<div class="chart-row">
+    <div class="chart-box">
+        <h2>Total Energy Consumption</h2>
+        <canvas id="compareChart"></canvas>
+    </div>
+</div>
+
+<!-- SAFE DATA TRANSFER -->
+<div id="compare-data"
+     data-labels='{{ labels | tojson }}'
+     data-values='{{ values | tojson }}'>
+</div>
+
+<script>
+    const box = document.getElementById("compare-data");
+    const labels = JSON.parse(box.dataset.labels);
+    const values = JSON.parse(box.dataset.values);
+
+    new Chart(document.getElementById("compareChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Total Energy (Wh)",
+                data: values,
+                backgroundColor: "#f97316"
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+<a href="/" class="nav-link">⬅ Back to Dashboard</a>
+
+</body>
+</html>
