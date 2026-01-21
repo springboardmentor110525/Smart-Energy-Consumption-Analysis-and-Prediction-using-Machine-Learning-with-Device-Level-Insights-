@@ -1,0 +1,81 @@
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.home-body {
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.home-container {
+    text-align: center;
+}
+
+.primary-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.forecast-body {
+    background: #f5f7fb;   /* light background */
+    color: #000;           /* dark text */
+    min-height: 100vh;
+}
+
+.forecast-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 30px;
+}
+
+.form-box input, select, button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+}
+
+button {
+    background: #00c6ff;
+    border: none;
+    font-weight: bold;
+}
+
+.tip-box {
+    background: #eef6ff;   /* light blue tip box */
+    padding: 15px;
+    border-left: 5px solid #00c6ff;
+    margin-top: 20px;
+    color: #000;
+}
+
+.charts div {
+    margin-top: 30px;
+}
+
+.hidden {
+    display: none;
+} 
+.spinner {
+    width: 45px;
+    height: 45px;
+    border: 5px solid #e5e7eb;
+    border-top: 5px solid #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

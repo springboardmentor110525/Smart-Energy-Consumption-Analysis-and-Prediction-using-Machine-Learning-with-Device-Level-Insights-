@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Energy Forecast</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body class="forecast-body">
+
+<div class="forecast-container">
+
+    <h2>🔮 Energy Prediction</h2>
+
+    <!-- ❗ NO FORM TAG (PREVENTS GET REQUEST) -->
+    <div class="form-box">
+        <input type="number" id="energy" min="0" placeholder="Enter energy (kWh)">
+
+        <select id="device">
+            <option value="">Select Device</option>
+            <option value="AC">AC</option>
+            <option value="Light">Light</option>
+            <option value="TV">TV</option>
+            <option value="Fridge">Fridge</option>
+            <option value="Washer">Washer</option>
+        </select>
+
+        <select id="horizon">
+            <option value="">Prediction Horizon</option>
+            <option value="hour">Next Hour</option>
+            <option value="day">Next Day</option>
+            <option value="week">Next Week</option>
+            <option value="month">Next Month</option>
+        </select>
+
+        <!-- ❗ BUTTON IS NOT SUBMIT -->
+        <button type="button" onclick="predictEnergy()">📈 Predict</button>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result-box" class="hidden">
+        <h3>📊 Prediction Result</h3>
+
+        <!-- LOADER -->
+        <div id="loader" class="hidden" style="text-align:center; margin:20px;">
+            <div class="spinner"></div>
+            <p>Calculating energy prediction…</p>
+        </div>
+
+        <!-- PREDICTIONS -->
+        <div id="prediction-list"></div>
+
+        <div class="tip-box">
+            <h4>🧠 Smart Energy Tip</h4>
+            <p id="tip"></p>
+        </div>
+
+        <div class="charts">
+            <div id="lineChart"></div>
+            <div id="barChart"></div>
+            <div id="pieChart"></div>
+        </div>
+
+        <div style="margin-top:30px; text-align:center;">
+            <button onclick="window.location.href='/'">⬅ Back to Home</button>
+        </div>
+    </div>
+
+
+</div>
+
+<script src="{{ url_for('static', filename='forecast.js') }}"></script>
+</body>
+</html>
