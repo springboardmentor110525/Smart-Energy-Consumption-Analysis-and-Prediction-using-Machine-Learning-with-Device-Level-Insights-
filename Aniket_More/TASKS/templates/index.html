@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Energy Forecast</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .result, .tip {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #ecf0f1;
+      border-left: 5px solid #3498db;
+      border-radius: 5px;
+    }
+    #loading {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      color: #555;
+      font-style: italic;
+    }
+    canvas {
+      margin-top: 30px;
+      width: 100%;
+      max-height: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>⚡ Smart Energy Forecast</h1>
+
+    <label>Current Energy Usage (kWh)</label>
+    <input type="number" id="currentEnergy" placeholder="Eg: 45" step="0.01">
+
+    <label>Select Device</label>
+    <select id="device">
+      <option value="fridge">🥶 Fridge</option>
+      <option value="air conditioning kw">❄️ Air Conditioner</option>
+      <option value="dishwasher">🍽️ Dishwasher</option>
+      <option value="laundry kw">👕 Laundry</option>
+      <option value="microwave">🍲 Microwave</option>
+    </select>
+
+    <label>Select Time Feature</label>
+    <select id="time">
+      <option value="hourly">Hourly</option>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+
+    <button onclick="getPrediction()">Predict</button>
+
+    <div id="loading">⏳ Loading prediction...</div>
+    <div class="result" id="forecastResult">Prediction will appear here...</div>
+    <div class="tip" id="smartTip"></div>
+
+    <canvas id="forecastChart"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    async function getPrediction() {
+      const currentEnergy = document.getElementById("currentEnergy").value;
+      const device = document.getElementById("device").value;
+      const time = document.getElementById("time").value;
+
+      document.getElementById("loading").style.display = "block";
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_energy: currentEnergy,
+          device: device,
+          time_feature: time
+        })
+      });
+
+      const data = await response.json();
+      document.getElementById("loading").style.display = "none";
+
+      document.getElementById("forecastResult").innerText =
+        `Predicted ${time} energy usage: ${data.prediction_kWh} kWh`;
+
+      document.getElementById("smartTip").innerText = data.smart_tip;
+
+      renderChart(data.trend);
+    }
+
+    function renderChart(trendData) {
+      const ctx = document.getElementById("forecastChart");
+      if (window.energyChart) window.energyChart.destroy();
+
+      window.energyChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: trendData.map(t => t.time),
+          datasets: [{
+            label: "Energy Consumption (kWh)",
+            data: trendData.map(t => t.value),
+            fill: true,
+            borderColor: "#3498db",
+            backgroundColor: "rgba(52,152,219,0.2)",
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+  </script>
+</body>
+</html>

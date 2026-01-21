@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/predict-page">Prediction</a>
+</nav>
+
+<div class="container">
+    <h1>📜 Prediction History</h1>
+    <p>This page stores previously predicted energy consumption values.</p>
+
+    <table border="1" width="100%" cellpadding="10">
+        <tr>
+            <th>Date & Time</th>
+            <th>Device</th>
+            <th>Prediction (kWh)</th>
+        </tr>
+        <tr>
+            <td>19-01-2026 14:35</td>
+            <td>Air Conditioner</td>
+            <td>1.43</td>
+        </tr>
+        <tr>
+            <td>19-01-2026 14:34</td>
+            <td>Dishwasher</td>
+            <td>4.66</td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

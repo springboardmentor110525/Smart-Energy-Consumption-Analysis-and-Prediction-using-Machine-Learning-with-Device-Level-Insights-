@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Energy Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<nav>
+    <a href="/">Dashboard</a>
+</nav>
+
+<div class="container">
+    <h1>📊 Energy Consumption Reports</h1>
+    <p>Visual representation of household energy usage.</p>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Hourly Consumption</h3>
+            <img src="{{ url_for('static', filename='plots/hourly_consumption.png') }}" width="300">
+        </div>
+
+        <div class="card">
+            <h3>Daily Consumption</h3>
+            <img src="{{ url_for('static', filename='plots/daily_consumption.png') }}" width="300">
+        </div>
+
+        <div class="card">
+            <h3>Monthly Consumption</h3>
+            <img src="{{ url_for('static', filename='plots/monthly_consumption.png') }}" width="300">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

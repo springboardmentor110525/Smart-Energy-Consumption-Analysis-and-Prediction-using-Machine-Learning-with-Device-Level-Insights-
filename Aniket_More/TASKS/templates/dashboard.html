@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Energy Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- 🔹 LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <h2>⚡ Smart Energy</h2>
+        <ul>
+            <li onclick="loadPage('/')">🏠 Dashboard</li>
+            <li onclick="loadPage('/devices')">🔌 Devices</li>
+            <li onclick="loadPage('/history')">📜 History</li>
+            <li onclick="loadPage('/reports')">📊 Reports</li>
+            <li onclick="loadPage('/settings')">⚙️ Settings</li>
+        </ul>
+    </aside>
+
+    <!-- 🔹 RIGHT CONTENT (YOUR EXISTING DASHBOARD) -->
+    <main class="main-content">
+
+        <header class="hero">
+            <h1>⚡ Smart Energy Consumption Analysis</h1>
+            <p>AI-powered device-level energy prediction & optimization</p>
+            <button onclick="goToPrediction()">Start Prediction 🚀</button>
+        </header>
+
+        <section class="cards">
+
+            <div class="card">
+                <h2>📊 Dataset</h2>
+                <p>
+                    HomeC_augmented dataset with minute-level device-wise
+                    energy consumption, weather data & time features.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>🤖 Machine Learning</h2>
+                <p>
+                    LSTM model trained on time-series data to predict
+                    hourly, daily, weekly & monthly consumption.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>💡 Smart Suggestions</h2>
+                <p>
+                    Device-specific energy saving tips generated
+                    dynamically after prediction.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>📈 Visual Analytics</h2>
+                <p>
+                    Interactive charts for consumption trends
+                    across multiple time scales.
+                </p>
+            </div>
+
+        </section>
+
+        <footer>
+            <p>Developed using Flask, Python, LSTM & Web Technologies</p>
+        </footer>
+
+    </main>
+
+</div>
+
+</body>
+</html>

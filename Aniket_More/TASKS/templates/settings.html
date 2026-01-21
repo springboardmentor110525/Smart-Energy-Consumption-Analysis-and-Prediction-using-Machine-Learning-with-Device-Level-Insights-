@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Settings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<nav>
+    <a href="/">Dashboard</a>
+</nav>
+
+<div class="container">
+    <h1>⚙️ System Configuration</h1>
+
+    <div class="cards">
+        <div class="card">
+            <b>ML Model</b><br>
+            Random Forest / LSTM
+        </div>
+
+        <div class="card">
+            <b>Prediction Unit</b><br>
+            kWh
+        </div>
+
+        <div class="card">
+            <b>Dataset</b><br>
+            HomeC Augmented Dataset
+        </div>
+
+        <div class="card">
+            <b>Deployment</b><br>
+            Flask (Localhost)
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
