@@ -16,12 +16,20 @@ os.chdir(PROJECT_DIR)
 
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
+import auto_train
 
 # Suppress TensorFlow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 app = Flask(__name__)
 CORS(app)
+
+# Upload configuration
+UPLOAD_FOLDER = os.path.join(PROJECT_DIR, 'uploads')
+ALLOWED_EXTENSIONS = {'csv'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max
 
 # Global variables for loaded models and data
 models = {}
@@ -97,8 +105,8 @@ def generate_smart_suggestions(device_data):
             
             device_name = col.replace(' [kW]', '')
             
-            # High usage devices
-            if avg_usage > 0.3:
+            # High usage devices (lowered threshold for demo data)
+            if avg_usage > 0.05:
                 suggestions.append({
                     'device': device_name,
                     'type': 'high_usage',
@@ -108,7 +116,7 @@ def generate_smart_suggestions(device_data):
                 })
             
             # Furnace optimization
-            if 'Furnace' in col and avg_usage > 0.2:
+            if 'Furnace' in col and avg_usage > 0.08:
                 suggestions.append({
                     'device': device_name,
                     'type': 'hvac',
@@ -118,7 +126,7 @@ def generate_smart_suggestions(device_data):
                 })
             
             # Kitchen appliances
-            if 'Kitchen' in col and avg_usage > 0.1:
+            if 'Kitchen' in col and avg_usage > 0.002:
                 suggestions.append({
                     'device': device_name,
                     'type': 'kitchen',
@@ -129,7 +137,7 @@ def generate_smart_suggestions(device_data):
     
     # Overall suggestions
     total_usage = df['use [kW]'].mean() if 'use [kW]' in df.columns else 0
-    if total_usage > 1.0:
+    if total_usage > 0.5:
         suggestions.insert(0, {
             'device': 'Overall',
             'type': 'general',
@@ -169,6 +177,98 @@ def history_page():
 def reports_page():
     """Render the reports page."""
     return render_template('reports.html')
+
+
+@app.route('/settings')
+def settings_page():
+    """Render the settings page."""
+    return render_template('settings.html')
+
+
+def allowed_file(filename):
+    """Check if uploaded file has allowed extension."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/api/dataset-info')
+def get_dataset_info():
+    """Get current dataset information."""
+    info = auto_train.get_dataset_info()
+    return jsonify(info)
+
+
+@app.route('/api/upload-dataset', methods=['POST'])
+def upload_dataset():
+    """Handle CSV file upload."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file type. Only CSV files are allowed.'}), 400
+    
+    try:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        # Validate the CSV
+        is_valid, message, _ = auto_train.validate_csv(filepath)
+        
+        if not is_valid:
+            os.remove(filepath)  # Clean up invalid file
+            return jsonify({'error': message}), 400
+        
+        return jsonify({
+            'success': True,
+            'message': message,
+            'filename': filename,
+            'filepath': filepath
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/train-models', methods=['POST'])
+def train_models():
+    """Trigger model retraining."""
+    data = request.json or {}
+    filepath = data.get('filepath')
+    
+    if not filepath:
+        # Use most recent upload
+        uploads = os.listdir(app.config['UPLOAD_FOLDER'])
+        if not uploads:
+            return jsonify({'error': 'No dataset uploaded'}), 400
+        
+        # Sort by modification time and get most recent
+        uploads = sorted(
+            uploads,
+            key=lambda x: os.path.getmtime(os.path.join(app.config['UPLOAD_FOLDER'], x)),
+            reverse=True
+        )
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], uploads[0])
+    
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    
+    success, message = auto_train.start_training_async(filepath)
+    
+    if success:
+        return jsonify({'success': True, 'message': message})
+    else:
+        return jsonify({'error': message}), 400
+
+
+@app.route('/api/training-status')
+def get_training_status():
+    """Get current training status."""
+    status = auto_train.get_training_status()
+    return jsonify(status)
 
 
 @app.route('/api/overview')
@@ -450,58 +550,94 @@ def generate_report():
         
         df = data_cache['hourly']
         
-        # Parse dates
+        # Parse dates - handle timezone-naive comparison
         if start_date:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            start_dt = pd.to_datetime(start_date)
         else:
             start_dt = df.index.min()
         
         if end_date:
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            end_dt = pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
         else:
             end_dt = df.index.max()
+        
+        # Make sure we're comparing like types (remove timezone if present)
+        if hasattr(df.index, 'tz') and df.index.tz is not None:
+            start_dt = start_dt.tz_localize(df.index.tz) if start_dt.tzinfo is None else start_dt
+            end_dt = end_dt.tz_localize(df.index.tz) if end_dt.tzinfo is None else end_dt
         
         # Filter data
         df_filtered = df[(df.index >= start_dt) & (df.index <= end_dt)]
         
+        if len(df_filtered) == 0:
+            return jsonify({
+                'report': [],
+                'message': f'No data found between {start_date} and {end_date}. Data range: {df.index.min()} to {df.index.max()}'
+            })
+        
         # Generate report based on type
+        report = []
+        
         if report_type == 'daily':
             daily = df_filtered.resample('D')['use [kW]'].agg(['sum', 'mean', 'max'])
-            report = []
+            daily = daily.dropna()
             for date, row in daily.iterrows():
-                report.append({
-                    'date': str(date.date()),
-                    'total': round(row['sum'], 2),
-                    'average': round(row['mean'], 4),
-                    'peak': round(row['max'], 4),
-                    'cost': round(row['sum'] * 0.12, 2)
-                })
+                if pd.notna(row['sum']):
+                    report.append({
+                        'date': str(date.date()),
+                        'total': round(float(row['sum']), 2),
+                        'average': round(float(row['mean']), 4),
+                        'peak': round(float(row['max']), 4),
+                        'cost': round(float(row['sum']) * 0.12, 2)
+                    })
         elif report_type == 'weekly':
             weekly = df_filtered.resample('W')['use [kW]'].agg(['sum', 'mean', 'max'])
-            report = []
+            weekly = weekly.dropna()
             for date, row in weekly.iterrows():
-                report.append({
-                    'date': f"Week of {str(date.date())}",
-                    'total': round(row['sum'], 2),
-                    'average': round(row['mean'], 4),
-                    'peak': round(row['max'], 4),
-                    'cost': round(row['sum'] * 0.12, 2)
-                })
+                if pd.notna(row['sum']):
+                    report.append({
+                        'date': f"Week of {str(date.date())}",
+                        'total': round(float(row['sum']), 2),
+                        'average': round(float(row['mean']), 4),
+                        'peak': round(float(row['max']), 4),
+                        'cost': round(float(row['sum']) * 0.12, 2)
+                    })
+        elif report_type == 'device':
+            # Device breakdown report
+            device_cols = get_device_columns()
+            for col in device_cols:
+                if col in df_filtered.columns:
+                    device_name = col.replace(' [kW]', '')
+                    total = df_filtered[col].sum()
+                    if pd.notna(total) and total > 0:
+                        report.append({
+                            'date': device_name,
+                            'total': round(float(total), 2),
+                            'average': round(float(df_filtered[col].mean()), 4),
+                            'peak': round(float(df_filtered[col].max()), 4),
+                            'cost': round(float(total) * 0.12, 2)
+                        })
+            # Sort by total usage
+            report.sort(key=lambda x: x['total'], reverse=True)
         else:
+            # Monthly report
             monthly = df_filtered.resample('ME')['use [kW]'].agg(['sum', 'mean', 'max'])
-            report = []
+            monthly = monthly.dropna()
             for date, row in monthly.iterrows():
-                report.append({
-                    'date': date.strftime('%B %Y'),
-                    'total': round(row['sum'], 2),
-                    'average': round(row['mean'], 4),
-                    'peak': round(row['max'], 4),
-                    'cost': round(row['sum'] * 0.12, 2)
-                })
+                if pd.notna(row['sum']):
+                    report.append({
+                        'date': date.strftime('%B %Y'),
+                        'total': round(float(row['sum']), 2),
+                        'average': round(float(row['mean']), 4),
+                        'peak': round(float(row['max']), 4),
+                        'cost': round(float(row['sum']) * 0.12, 2)
+                    })
         
         return jsonify({'report': report})
         
     except Exception as e:
+        import traceback
+        print(f"Report generation error: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 

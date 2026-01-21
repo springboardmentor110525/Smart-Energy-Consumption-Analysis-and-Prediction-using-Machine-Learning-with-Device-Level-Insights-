@@ -21,6 +21,7 @@
                     <span class="logo-icon">⚡</span>
                     <h2>Smart Energy</h2>
                 </a>
+                <button class="sidebar-toggle-desktop">◀</button>
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-section">
@@ -50,6 +51,10 @@
                     <a href="/reports" class="nav-link active">
                         <span class="nav-icon">📋</span>
                         <span class="nav-text">Reports</span>
+                    </a>
+                    <a href="/settings" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
                     </a>
                 </div>
             </nav>
@@ -136,15 +141,49 @@
                                 Report</button>
                             <button type="button" class="btn btn-success" onclick="downloadReport('csv')">⬇️ Download
                                 CSV</button>
-                            <button type="button" class="btn btn-secondary" onclick="window.print()">🖨️ Print
+                            <button type="button" class="btn btn-secondary" onclick="printReport()">🖨️ Print
                                 Report</button>
                         </div>
                     </form>
                 </section>
 
                 <!-- Report Preview -->
-                <section class="card" style="padding: 1.5rem;">
+                <section class="card" style="padding: 1.5rem;" id="report-section">
+                    <!-- Print Header (only visible when printing) -->
+                    <div id="print-header" style="display: none;">
+                        <h1 style="text-align: center; margin-bottom: 0.5rem;">Smart Energy Consumption Report</h1>
+                        <p id="print-date-range" style="text-align: center; color: #666; margin-bottom: 1rem;"></p>
+                        <p style="text-align: center; color: #666; margin-bottom: 1.5rem;">
+                            Generated on: <span id="print-generated-date"></span>
+                        </p>
+                        <hr style="margin-bottom: 1.5rem;">
+                    </div>
+
                     <h2 style="border: none; padding: 0 0 1rem 0;">Report Preview</h2>
+
+                    <!-- Summary Stats (visible in preview and print) -->
+                    <div id="report-summary" class="report-summary" style="display: none; margin-bottom: 1.5rem;">
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                            <div class="stat-mini">
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Total Consumption</span>
+                                <strong id="summary-total" style="font-size: 1.25rem;">-</strong>
+                            </div>
+                            <div class="stat-mini">
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Average Daily</span>
+                                <strong id="summary-avg" style="font-size: 1.25rem;">-</strong>
+                            </div>
+                            <div class="stat-mini">
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Peak Usage</span>
+                                <strong id="summary-peak" style="font-size: 1.25rem;">-</strong>
+                            </div>
+                            <div class="stat-mini">
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Total Cost</span>
+                                <strong id="summary-cost" style="font-size: 1.25rem;">-</strong>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="report-preview" class="report-preview">
                         <table class="report-table">
                             <thead>
@@ -165,6 +204,17 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Suggestions Section (hidden by default, shown when checkbox is checked) -->
+                    <div id="suggestions-section"
+                        style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                        <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
+                            💡 Energy-Saving Suggestions
+                        </h3>
+                        <div id="suggestions-body">
+                            <!-- Suggestions will be loaded here -->
+                        </div>
+                    </div>
                 </section>
             </main>
 
@@ -175,12 +225,7 @@
     </div>
 
     <script src="/static/js/reports.js"></script>
-    <script>
-        function toggleNav() {
-            document.querySelector('.sidebar').classList.toggle('open');
-            document.querySelector('.nav-overlay').classList.toggle('show');
-        }
-    </script>
+    <script src="/static/js/sidebar.js"></script>
 </body>
 
 </html>

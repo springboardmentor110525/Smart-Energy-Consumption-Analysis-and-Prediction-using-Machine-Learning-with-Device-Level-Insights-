@@ -28,29 +28,25 @@ except ImportError:
     sys.exit(1)
 
 
-def build_lstm_model(input_shape, units=64, dropout=0.2):
+def build_lstm_model(input_shape, units=32):
     """
-    Build an LSTM model for energy consumption forecasting.
+    Build a simplified LSTM model for energy consumption forecasting.
     
     Args:
         input_shape: Tuple of (time_steps, features)
         units: Number of LSTM units
-        dropout: Dropout rate for regularization
     
     Returns:
         Compiled Keras model
     """
     model = Sequential([
-        LSTM(units, return_sequences=True, input_shape=input_shape),
-        Dropout(dropout),
-        LSTM(units // 2, return_sequences=False),
-        Dropout(dropout),
-        Dense(32, activation='relu'),
+        LSTM(units, input_shape=input_shape),
+        Dense(16, activation='relu'),
         Dense(1)
     ])
     
     model.compile(
-        optimizer='adam',
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
         loss='mse',
         metrics=['mae']
     )
@@ -58,7 +54,7 @@ def build_lstm_model(input_shape, units=64, dropout=0.2):
     return model
 
 
-def train_lstm(time_steps=24, epochs=100, batch_size=16):
+def train_lstm(time_steps=6, epochs=100, batch_size=16):
     """Train and evaluate the LSTM model."""
     print("Loading data...")
     train_df, test_df = load_data()
@@ -199,4 +195,4 @@ def train_lstm(time_steps=24, epochs=100, batch_size=16):
 
 
 if __name__ == "__main__":
-    train_lstm(time_steps=12, epochs=50, batch_size=8)
+    train_lstm(time_steps=6, epochs=100, batch_size=16)

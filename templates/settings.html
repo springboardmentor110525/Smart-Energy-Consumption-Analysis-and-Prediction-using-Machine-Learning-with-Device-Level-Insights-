@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Smart Energy Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Mobile Nav Toggle -->
+        <button class="nav-toggle" onclick="toggleNav()">☰</button>
+        <div class="nav-overlay" onclick="toggleNav()"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-logo">
+                    <span class="logo-icon">⚡</span>
+                    <h2>Smart Energy</h2>
+                </a>
+                <button class="sidebar-toggle-desktop">◀</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a href="/" class="nav-link">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Analytics</div>
+                    <a href="/predictions" class="nav-link">
+                        <span class="nav-icon">🔮</span>
+                        <span class="nav-text">Predictions</span>
+                    </a>
+                    <a href="/devices" class="nav-link">
+                        <span class="nav-icon">🔌</span>
+                        <span class="nav-text">Device Analysis</span>
+                    </a>
+                    <a href="/history" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Historical Data</span>
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Tools</div>
+                    <a href="/reports" class="nav-link">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                    <a href="/settings" class="nav-link active">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <p>© 2026 Smart Energy Analysis</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo">
+                        <span class="logo-icon">⚙️</span>
+                        <h1>Settings</h1>
+                    </div>
+                    <div class="header-info">
+                        <span>Dataset Management & Model Training</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <!-- Current Dataset Info -->
+                <section class="overview-section">
+                    <div class="card stat-card">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-info">
+                            <h3>Current Dataset</h3>
+                            <p id="dataset-name">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h3>Total Rows</h3>
+                            <p id="dataset-rows">--</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <h3>Date Range</h3>
+                            <p id="dataset-range">--</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon">🔧</div>
+                        <div class="stat-info">
+                            <h3>Last Trained</h3>
+                            <p id="last-trained">--</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Upload & Training Section -->
+                <section class="settings-section">
+                    <div class="card upload-card">
+                        <h2>📤 Upload New Dataset</h2>
+                        <div class="upload-content">
+                            <div class="upload-zone" id="upload-zone">
+                                <div class="upload-icon">📁</div>
+                                <p class="upload-text">Drag & drop your CSV file here</p>
+                                <p class="upload-subtext">or click to browse files</p>
+                                <input type="file" id="file-input" accept=".csv" hidden>
+                            </div>
+                            <div class="upload-info" id="upload-info" style="display: none;">
+                                <div class="file-preview">
+                                    <span class="file-icon">📄</span>
+                                    <div class="file-details">
+                                        <span class="file-name" id="selected-file-name">--</span>
+                                        <span class="file-size" id="selected-file-size">--</span>
+                                    </div>
+                                    <button class="btn-remove" onclick="removeFile()">✕</button>
+                                </div>
+                            </div>
+                            <div class="upload-requirements">
+                                <h4>Required CSV Format:</h4>
+                                <ul>
+                                    <li><code>time</code> or <code>datetime</code> - Timestamp column</li>
+                                    <li><code>use [kW]</code> - Total energy consumption</li>
+                                    <li>Device columns (optional) - e.g., <code>Fridge [kW]</code>,
+                                        <code>Furnace 1 [kW]</code>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="upload-actions">
+                                <button class="btn btn-primary" id="upload-btn" onclick="uploadAndTrain()" disabled>
+                                    <span>📤</span> Upload & Train Models
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card training-card">
+                        <h2>🔄 Training Status</h2>
+                        <div class="training-content">
+                            <div class="training-status" id="training-status">
+                                <div class="status-indicator idle" id="status-indicator">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text" id="status-text">Idle</span>
+                                </div>
+                                <div class="progress-container" id="progress-container" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-info">
+                                        <span class="progress-step" id="progress-step">Preparing...</span>
+                                        <span class="progress-percent" id="progress-percent">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="training-message" id="training-message"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Training History -->
+                <section class="history-section">
+                    <div class="card">
+                        <h2>📜 Training History</h2>
+                        <div class="training-history" id="training-history">
+                            <div class="empty-state">
+                                <p>No training history yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="footer">
+                <p>Smart Energy Consumption Analysis & Prediction | Powered by Machine Learning</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/settings.js"></script>
+</body>
+
+</html>

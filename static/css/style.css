@@ -6,14 +6,14 @@
     --secondary: #10b981;
     --accent: #f59e0b;
     --danger: #ef4444;
-    --bg-dark: #0f172a;
-    --bg-card: #1e293b;
-    --bg-card-hover: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border: #334155;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    --bg-dark: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -133,6 +133,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    overflow: hidden;
 }
 
 .stat-icon {
@@ -140,6 +141,13 @@ body {
     padding: 0.75rem;
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .stat-info h3 {
@@ -147,12 +155,18 @@ body {
     color: var(--text-secondary);
     font-weight: 500;
     margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-info p {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Charts Section */
@@ -402,7 +416,7 @@ body {
 
 .sidebar {
     width: 260px;
-    background: linear-gradient(180deg, var(--bg-card) 0%, #151f32 100%);
+    background: linear-gradient(180deg, var(--bg-card) 0%, #eef2f7 100%);
     border-right: 1px solid var(--border);
     position: fixed;
     height: 100vh;
@@ -415,6 +429,9 @@ body {
 .sidebar-header {
     padding: 1.5rem;
     border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sidebar-logo {
@@ -494,6 +511,80 @@ body {
     border-top: 1px solid var(--border);
     font-size: 0.75rem;
     color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.3s;
+}
+
+/* Sidebar Toggle Desktop */
+.sidebar-toggle-desktop {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    margin-left: auto;
+    transition: all 0.2s;
+}
+
+.sidebar-toggle-desktop:hover {
+    color: var(--primary);
+    background: var(--bg-card-hover);
+}
+
+@media (min-width: 769px) {
+    .sidebar-toggle-desktop {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* Collapsed Sidebar State */
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .nav-section-title,
+.sidebar.collapsed .sidebar-footer,
+.sidebar.collapsed .sidebar-logo h2 {
+    display: none;
+    opacity: 0;
+}
+
+.sidebar.collapsed .sidebar-header {
+    padding: 1.5rem 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-logo {
+    justify-content: center;
+}
+
+.sidebar.collapsed .nav-link {
+    justify-content: center;
+    padding: 0.85rem 0;
+}
+
+.sidebar.collapsed .nav-icon {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.sidebar.collapsed .sidebar-toggle-desktop {
+    margin: 0 auto;
+    transform: rotate(180deg);
+}
+
+/* Main Content with Collapsed Sidebar */
+.main-wrapper.collapsed {
+    margin-left: 80px;
 }
 
 /* Main Content with Sidebar */
@@ -937,19 +1028,443 @@ body {
 /* Print Styles */
 @media print {
 
+    /* Hide non-essential elements */
     .sidebar,
     .nav-toggle,
-    .btn {
+    .nav-overlay,
+    .btn,
+    .btn-group,
+    .report-type-grid,
+    .form-row,
+    .form-group,
+    #report-form,
+    .footer,
+    .sidebar-toggle-desktop {
         display: none !important;
     }
 
-    .main-wrapper {
-        margin-left: 0;
+    /* Reset layout for printing */
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
     }
 
+    .app-container {
+        display: block !important;
+    }
+
+    .main-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .header {
+        background: white !important;
+        border-bottom: 2px solid black !important;
+        position: static !important;
+    }
+
+    .header-content {
+        justify-content: center !important;
+    }
+
+    .logo h1 {
+        background: none !important;
+        -webkit-text-fill-color: black !important;
+        color: black !important;
+    }
+
+    /* Card styling for print */
     .card {
         break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #ddd;
+        box-shadow: none !important;
+        border: 1px solid #333 !important;
+        margin-bottom: 1rem !important;
+        page-break-inside: avoid;
     }
+
+    /* Table styling for print */
+    .report-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    .report-table th,
+    .report-table td {
+        border: 1px solid #333 !important;
+        padding: 8px !important;
+        text-align: left !important;
+        color: black !important;
+    }
+
+    .report-table th {
+        background: #f0f0f0 !important;
+        font-weight: bold !important;
+    }
+
+    .report-table tr:nth-child(even) {
+        background: #f9f9f9 !important;
+    }
+
+    .report-table tr:hover {
+        background: transparent !important;
+    }
+
+    /* Summary row */
+    .report-table tr[style*="font-weight: bold"] {
+        background: #e0e0e0 !important;
+        font-weight: bold !important;
+    }
+
+    /* Report preview section */
+    .report-preview {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    /* Print header */
+    .main-content::before {
+        content: "Smart Energy Consumption Report";
+        display: block;
+        font-size: 18pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #333;
+    }
+
+    /* Page setup */
+    @page {
+        margin: 1.5cm;
+        size: A4;
+    }
+}
+
+/* ===== SETTINGS PAGE STYLES ===== */
+
+/* Settings Section Layout */
+.settings-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .settings-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Upload Card */
+.upload-card,
+.training-card {
+    padding-bottom: 1.5rem;
+}
+
+.upload-content,
+.training-content {
+    padding: 1.5rem;
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-dark);
+}
+
+.upload-zone:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.upload-zone.dragover {
+    border-color: var(--secondary);
+    background: rgba(16, 185, 129, 0.1);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.upload-text {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.upload-subtext {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Upload Info (Selected File) */
+.upload-info {
+    margin-bottom: 1.5rem;
+}
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--border);
+}
+
+.file-icon {
+    font-size: 2rem;
+}
+
+.file-details {
+    flex: 1;
+}
+
+.file-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.file-size {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-remove:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* Upload Requirements */
+.upload-requirements {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+}
+
+.upload-requirements h4 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.upload-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.upload-requirements li {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.upload-requirements li::before {
+    content: "•";
+    color: var(--primary);
+}
+
+.upload-requirements code {
+    background: var(--bg-card);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--secondary);
+}
+
+/* Upload Actions */
+.upload-actions {
+    margin-top: 1.5rem;
+}
+
+/* Training Status */
+.training-status {
+    margin-bottom: 1rem;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+}
+
+.status-indicator.idle .status-dot {
+    background: var(--text-secondary);
+}
+
+.status-indicator.training .status-dot {
+    background: var(--accent);
+    animation: pulse 1s infinite;
+}
+
+.status-indicator.complete .status-dot {
+    background: var(--secondary);
+}
+
+.status-indicator.error .status-dot {
+    background: var(--danger);
+}
+
+.status-text {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Progress Bar */
+.progress-container {
+    background: var(--bg-dark);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+}
+
+.progress-step {
+    color: var(--text-secondary);
+}
+
+.progress-percent {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Training Messages */
+.training-message {
+    margin-top: 1rem;
+}
+
+.success-message {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--secondary);
+    color: var(--secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* Training History */
+.history-section {
+    margin-bottom: 2rem;
+}
+
+.training-history {
+    padding: 1rem 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: var(--bg-dark);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-left: 3px solid var(--primary);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.history-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.history-file {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.history-details {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.history-rows {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.history-metric {
+    font-size: 0.85rem;
+    color: var(--secondary);
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
 }

@@ -27,20 +27,17 @@ df = df.sort_index()
 df = df[~df.index.duplicated(keep='first')]
 print(f"     Date range: {df.index.min()} to {df.index.max()}")
 
-# Step 3: Resample to 15-minute intervals (more samples than hourly)
+# Step 3: Resample to 15-minute intervals
 print("\n[3/6] Resampling to 15-minute intervals...")
-print("     (Data is at second-level, 15-min gives 4x more samples than hourly)")
 numeric_cols = df.select_dtypes(include=[np.number]).columns
 df_hourly = df[numeric_cols].resample('15min').mean()
 
-# Remove rows with all NaN
+# Remove rows with all NaN and handle missing values
 df_hourly = df_hourly.dropna(how='all')
-print(f"     Hourly data: {len(df_hourly):,} rows")
-
-# Handle remaining NaN values with forward fill then backward fill
 df_hourly = df_hourly.ffill().bfill()
+print(f"     Resampled data: {len(df_hourly):,} rows")
 
-# Save clean hourly data
+# Save clean data
 df_hourly.to_csv('clean_energy_data.csv')
 print(f"     Saved: clean_energy_data.csv")
 
