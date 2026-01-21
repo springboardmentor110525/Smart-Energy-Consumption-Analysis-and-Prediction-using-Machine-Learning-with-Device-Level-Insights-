@@ -36,6 +36,13 @@ A full-stack Machine Learning application that forecasts home energy usage, dete
 
 ---
 
+## 📊 Dataset
+The model was trained on real-world smart home sensor data.
+* **Name:** Smart Home Dataset with Weather Information (`HomeC.csv`)
+* **Source:** [Click here to view on Kaggle](https://www.kaggle.com/datasets/taranveer/smart-home-dataset-with-weather-information)
+* **Details:** Contains minute-by-minute readings of household appliances (Furnace, Fridge, Kitchen) combined with local weather data (Temperature, Humidity, Wind Speed).
+
+---
 ## 📂 Project Structure
 
 ```bash
@@ -49,4 +56,5 @@ Smart-Energy-Analysis/
 │   └── index.html          # Frontend UI
 ├── static/                 # CSS/JS files
 └── notebooks/              # Jupyter Notebooks for Training
+
 
