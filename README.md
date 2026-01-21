@@ -131,9 +131,15 @@ Device-Level Insights
 (Screenshots included in presentation/demo)
 
 **Future Enhancements**
+
 IoT sensor integration
+
 Real-time energy monitoring
+
 Anomaly detection
+
 Smart home automation
+
 Cloud deployment (AWS/GCP)
+
 Mobile app integration
