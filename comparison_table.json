@@ -1,0 +1,26 @@
+[
+    {
+        "Model":"Linear Regression (Baseline)",
+        "MAE":0.7612044645,
+        "RMSE":1.7722780198,
+        "R\u00b2":0.8887722022
+    },
+    {
+        "Model":"LSTM (Single Split)",
+        "MAE":0.1412267685,
+        "RMSE":0.207633689,
+        "R\u00b2":0.9984733462
+    },
+    {
+        "Model":"LSTM (Cross Validation)",
+        "MAE":0.1176668555,
+        "RMSE":0.1795217097,
+        "R\u00b2":0.9988060117
+    },
+    {
+        "Model":"Tuned LSTM",
+        "MAE":0.0778676271,
+        "RMSE":0.1410860121,
+        "R\u00b2":0.9992951155
+    }
+]
