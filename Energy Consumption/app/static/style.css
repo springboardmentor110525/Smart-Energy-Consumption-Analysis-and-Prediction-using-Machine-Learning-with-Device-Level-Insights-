@@ -1,0 +1,42 @@
+body {
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+    font-family: Arial;
+}
+
+.card {
+    background: white;
+    width: 50%;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+h1 {
+    text-align: center;
+    color: #203a43;
+}
+
+textarea, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+button {
+    background: #203a43;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0f2027;
+}
+
+.result {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e3f2fd;
+    text-align: center;
+    border-radius: 6px;
+}
