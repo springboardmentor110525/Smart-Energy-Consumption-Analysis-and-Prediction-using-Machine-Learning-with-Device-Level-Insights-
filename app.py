@@ -1,9 +1,34 @@
-import pickle
-import os
 
+import os
+import numpy as np
+from flask import jsonify
 from flask import Flask, render_template, request, jsonify
+import joblib
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(BASE_DIR, "linear_regression_24hr_model.pkl")
+
+lr_model = joblib.load(MODEL_PATH)
+
+print("✅ 24-hour Linear Regression model loaded successfully")
+
+
+lr_model = joblib.load(MODEL_PATH)
+
+model = joblib.load(MODEL_PATH)
+print("✅ 24-hour Linear Regression model loaded successfully")
+
+# Model evaluation metrics (from test data)
+MODEL_METRICS = {
+    "mae": 46.51,
+    "rmse": 87.42,
+    "r2": 0.96
+}
+
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def home():
@@ -40,6 +65,34 @@ def analyze():
         "min_device": min_device,
         "tips": tips
     })
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    data = request.get_json()
+    values = data.get("values", [])
+
+    if len(values) != 24:
+        return jsonify({"error": "Exactly 24 values required"}), 400
+
+    X = np.array(values).reshape(1, -1)
+    prediction = lr_model.predict(X)[0]
+
+    return jsonify({
+        "predicted_units": round(float(prediction), 3)
+    })
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":

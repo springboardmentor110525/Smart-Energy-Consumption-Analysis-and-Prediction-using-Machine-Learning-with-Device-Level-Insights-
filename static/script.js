@@ -1,38 +1,48 @@
-document.getElementById("energyForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("predictBtn");
 
-    const data = {
-        ac: document.getElementById("ac").value,
-        fan: document.getElementById("fan").value,
-        fridge: document.getElementById("fridge").value,
-        tv: document.getElementById("tv").value,
-        wm: document.getElementById("wm").value
-    };
+    btn.addEventListener("click", async () => {
+        const input = document.getElementById("energyValues").value.trim();
 
-    fetch("/analyze", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(result => {
-        document.getElementById("results").style.display = "block";
-
-        document.getElementById("highDevice").innerText =
-            `${result.max_device} (${result.devices[result.max_device]} W)`;
-
-        document.getElementById("lowDevice").innerText =
-            `${result.min_device} (${result.devices[result.min_device]} W)`;
-
-        let table = "";
-        for (let d in result.devices) {
-            table += `<tr><td>${d}</td><td>${result.devices[d]}</td></tr>`;
+        if (!input) {
+            alert("Please enter 24 hourly values");
+            return;
         }
-        document.getElementById("deviceTable").innerHTML = table;
 
-        document.getElementById("tips").innerHTML =
-            result.tips.map(t => `<p>${t}</p>`).join("");
+        // Convert input string to array of numbers
+        const values = input.split(",").map(v => parseFloat(v.trim()));
+
+        if (values.length !== 24 || values.some(isNaN)) {
+            alert("Please enter EXACTLY 24 numeric values separated by commas");
+            return;
+        }
+
+        try {
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ values })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Show result
+            document.getElementById("resultBox").innerHTML = `
+                <h3>🔮 Predicted Energy Usage</h3>
+                <p><strong>${data.predicted_units} kWh</strong></p>
+            `;
+            document.getElementById("resultBox").style.display = "block";
+
+        } catch (err) {
+            console.error(err);
+            alert("Prediction failed. Check console.");
+        }
     });
 });

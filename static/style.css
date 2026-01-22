@@ -89,3 +89,21 @@ th, td {
     padding: 15px;
     border-radius: 8px;
 }
+
+.metrics-card {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f1f8ff;
+    border-left: 6px solid #4cafef;
+    border-radius: 8px;
+}
+
+.metrics-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.metrics-card li {
+    padding: 5px 0;
+    font-size: 16px;
+}
